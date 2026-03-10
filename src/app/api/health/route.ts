@@ -28,7 +28,7 @@ export async function GET() {
 
     // supabase connectivity + schema presence (minimal)
     const supabase = getSupabaseAdmin();
-    const res = await supabase.from("users").select("id", { head: true, count: "exact" }).limit(1);
+    const res = await supabase.from("users").select("anon_id", { head: true, count: "exact" }).limit(1);
     if (res.error) {
       return NextResponse.json({ status: "error", reason: `supabase: ${res.error.message}` }, { status: 500 });
     }
