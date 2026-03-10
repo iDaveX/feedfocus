@@ -1,6 +1,6 @@
 # FeedFocus — Test Instructions
 
-1) Open the app link (preferably from Telegram as a mini-app).
+1) Open the app link in your browser.
 
 2) Paste 5–20 lines of user feedback into the input field (one line = one review/ticket/comment).
 
@@ -31,6 +31,3 @@ Example:
 - Missing CJM stage(s)?
 - Hypotheses quality (too generic / actionable)?
 - Any UI/UX confusion?
-
-Notes:
-- If you opened the app in a regular browser and analysis fails with `Unauthorized: missing Telegram initData`, ask the owner to enable demo mode (`DEV_TELEGRAM_USER_ID` without `TELEGRAM_BOT_TOKEN`) or test inside Telegram.

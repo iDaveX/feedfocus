@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTelegramInitData } from "@/src/client/telegram";
 import type { DashboardData } from "@/src/shared/api";
 
 export default function DashboardPage() {
@@ -11,9 +10,8 @@ export default function DashboardPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const initData = getTelegramInitData();
         const res = await fetch(`/api/dashboard`, {
-          headers: initData ? { "x-telegram-init-data": initData } : {}
+          headers: {}
         });
         const json = (await res.json()) as DashboardData | { message?: string };
         if (!res.ok) {
@@ -106,7 +104,7 @@ export default function DashboardPage() {
 
       <div style={{ marginTop: 16 }}>
         <h3 style={{ marginTop: 0 }}>Примечание</h3>
-        <div className="muted">Данные хранятся 30 дней и доступны только пользователю Telegram.</div>
+        <div className="muted">Данные хранятся 30 дней и доступны в рамках текущего браузера/пользователя.</div>
       </div>
     </div>
   );

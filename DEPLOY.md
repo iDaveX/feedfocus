@@ -26,7 +26,8 @@ Minimum required for the MVP flow:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `GROQ_API_KEY`
-- `DEV_TELEGRAM_USER_ID` (recommended for browser-only public testing)
+- `NEXT_PUBLIC_POSTHOG_KEY` (recommended)
+- `NEXT_PUBLIC_POSTHOG_HOST` (recommended)
 
 Recommended:
 
@@ -37,7 +38,7 @@ Recommended:
 
 Optional:
 
-- `TELEGRAM_BOT_TOKEN` (required for Telegram mini-app auth)
+- `DEV_USER_ID` (фиксированный user id для демо; все посетители будут в одном пользователе)
 - `CRON_SECRET` (to enable `GET /api/cron/purge?secret=...`)
 
 ## 4) Deploy
@@ -50,7 +51,7 @@ After deploy, open:
 
 - `/api/health` → should return `{ "status": "ok" }`
 
-Then test the UI flow (Telegram mini-app):
+Then test the UI flow:
 
 1. Open `/`
 2. Paste 5–20 lines of feedback
@@ -58,10 +59,9 @@ Then test the UI flow (Telegram mini-app):
 4. Open results and hypotheses pages
 5. Open `/dashboard`
 
-If you want browser-only public testing (no Telegram):
+Optional demo-mode:
 
-- Do **not** set `TELEGRAM_BOT_TOKEN`
-- Set `DEV_TELEGRAM_USER_ID` (all testers will share this demo user)
+- Set `DEV_USER_ID` to make all testers share one “demo user” (useful for demos).
 
 ## Notes (security / MVP)
 

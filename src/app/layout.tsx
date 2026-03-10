@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import Script from "next/script";
 import Link from "next/link";
 import "./globals.css";
 import PosthogInit from "@/src/app/PosthogInit";
@@ -10,14 +9,14 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY || "";
+  const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+
   return (
     <html lang="ru">
-      <head>
-        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-      </head>
       <body>
         <main className="container">
-          <PosthogInit />
+          <PosthogInit apiKey={posthogKey} apiHost={posthogHost} />
           <div className="topbar">
             <div className="brand">
               <Link href="/">FeedFocus</Link>

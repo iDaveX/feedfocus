@@ -52,6 +52,6 @@ export async function GET(req: NextRequest) {
       hypothesisStatus: Array.from(statusCounts.entries()).map(([status, count]) => ({ status, count }))
     });
   } catch (e) {
-    return jsonError(e instanceof Error ? e.message : "Unauthorized.", 401);
+    return jsonError(e instanceof Error ? e.message : "Internal error.", 500);
   }
 }

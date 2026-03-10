@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { getTelegramInitData } from "@/src/client/telegram";
 import type { AnalysisDetails, HypothesisStatus } from "@/src/shared/api";
 import { trackEvent } from "@/src/client/track";
 
@@ -18,9 +17,8 @@ export default function HypothesesPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const initData = getTelegramInitData();
         const res = await fetch(`/api/analyses/${analysisId}`, {
-          headers: initData ? { "x-telegram-init-data": initData } : {}
+          headers: {}
         });
         const json = (await res.json()) as AnalysisDetails | { message?: string };
         if (!res.ok) {
@@ -42,12 +40,10 @@ export default function HypothesesPage() {
 
   async function setStatus(hypothesisId: string, status: HypothesisStatus) {
     try {
-      const initData = getTelegramInitData();
       const res = await fetch(`/api/hypotheses/${hypothesisId}`, {
         method: "PATCH",
         headers: {
-          "content-type": "application/json",
-          ...(initData ? { "x-telegram-init-data": initData } : {})
+          "content-type": "application/json"
         },
         body: JSON.stringify({ status })
       });

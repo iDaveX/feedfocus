@@ -44,6 +44,6 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return jsonError(e instanceof Error ? e.message : "Unauthorized.", 401);
+    return jsonError(e instanceof Error ? e.message : "Internal error.", 500);
   }
 }

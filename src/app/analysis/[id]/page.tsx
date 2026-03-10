@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getTelegramInitData } from "@/src/client/telegram";
 import type { AnalysisDetails } from "@/src/shared/api";
 
 export default function AnalysisPage() {
@@ -15,9 +14,8 @@ export default function AnalysisPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const initData = getTelegramInitData();
         const res = await fetch(`/api/analyses/${id}`, {
-          headers: initData ? { "x-telegram-init-data": initData } : {}
+          headers: {}
         });
         const json = (await res.json()) as AnalysisDetails | { message?: string };
         if (!res.ok) {

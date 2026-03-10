@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
     if (ins.error) return jsonError(`DB error: ${ins.error.message}`, 500);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return jsonError(e instanceof Error ? e.message : "Unauthorized.", 401);
+    return jsonError(e instanceof Error ? e.message : "Internal error.", 500);
   }
 }
-

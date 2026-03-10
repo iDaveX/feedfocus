@@ -4,9 +4,41 @@ create extension if not exists "pgcrypto";
 
 create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
-  telegram_user_id bigint not null unique,
+  anon_id text not null unique,
+  telegram_user_id bigint unique,
   created_at timestamptz not null default now()
 );
+
+-- Migration helpers (for older Telegram-based schemas)
+alter table public.users add column if not exists anon_id text;
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'users'
+      and column_name = 'telegram_user_id'
+  ) then
+    begin
+      alter table public.users alter column telegram_user_id drop not null;
+    exception when others then
+      null;
+    end;
+  end if;
+end $$;
+
+update public.users
+set anon_id = coalesce(
+  anon_id,
+  case when telegram_user_id is not null then 'tg_' || telegram_user_id::text else null end,
+  gen_random_uuid()::text
+)
+where anon_id is null;
+
+alter table public.users alter column anon_id set not null;
+create unique index if not exists users_anon_id_key on public.users (anon_id);
 
 create table if not exists public.analyses (
   id uuid primary key default gen_random_uuid(),

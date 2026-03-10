@@ -1,5 +1,3 @@
-import { getTelegramInitData } from "@/src/client/telegram";
-
 let sessionId: string | null = null;
 
 function getSessionId(): string {
@@ -17,7 +15,6 @@ function getSessionId(): string {
 }
 
 export async function trackEvent(name: string, meta: Record<string, unknown>) {
-  const initData = getTelegramInitData();
   const payload = {
     name,
     meta: {
@@ -30,11 +27,9 @@ export async function trackEvent(name: string, meta: Record<string, unknown>) {
   await fetch("/api/events", {
     method: "POST",
     headers: {
-      "content-type": "application/json",
-      ...(initData ? { "x-telegram-init-data": initData } : {})
+      "content-type": "application/json"
     },
     body: JSON.stringify(payload),
     keepalive: true
   }).catch(() => undefined);
 }
-

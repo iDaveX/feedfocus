@@ -2,10 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getTelegramInitData } from "@/src/client/telegram";
 import { trackEvent } from "@/src/client/track";
 import type { AnalysisListItem } from "@/src/shared/api";
-import type { AppMode } from "@/src/server/env";
 import { posthog } from "@/src/lib/posthog";
 
 function parseFeedbackItems(raw: string, maxItems: number): string[] {
@@ -23,7 +21,7 @@ function parseFeedbackItems(raw: string, maxItems: number): string[] {
   return lines.slice(0, maxItems);
 }
 
-export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; maxItems: number }) {
+export default function HomeClient({ maxItems }: { maxItems: number }) {
   const [raw, setRaw] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,23 +30,12 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
   const items = useMemo(() => parseFeedbackItems(raw, maxItems), [raw, maxItems]);
 
   useEffect(() => {
-    try {
-      // Telegram UI niceties
-      (window as any).Telegram?.WebApp?.ready?.();
-      (window as any).Telegram?.WebApp?.expand?.();
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
     void (async () => {
       try {
         await trackEvent("user_open_app", {});
         posthog.capture("visit");
-        const initData = getTelegramInitData();
         const res = await fetch("/api/analyses", {
-          headers: initData ? { "x-telegram-init-data": initData } : {}
+          headers: {}
         });
         if (!res.ok) return;
         const data = (await res.json()) as { items: AnalysisListItem[] };
@@ -64,12 +51,10 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
     setIsLoading(true);
     try {
       posthog.capture("analysis_started", { items: items.length });
-      const initData = getTelegramInitData();
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
-          ...(initData ? { "x-telegram-init-data": initData } : {})
+          "content-type": "application/json"
         },
         body: JSON.stringify({ raw })
       });
@@ -93,16 +78,6 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
 
   return (
     <>
-      <div className="info-banner">
-        {appMode === "telegram" ? (
-          <>Откройте приложение внутри Telegram, чтобы использовать анализ отзывов.</>
-        ) : appMode === "demo" ? (
-          <>Demo mode: анализ доступен для тестирования. Данные могут быть общими для всех пользователей.</>
-        ) : (
-          <>Авторизация не настроена. Обратитесь к разработчику.</>
-        )}
-      </div>
-
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Вставьте пользовательские отзывы</h2>
         <p className="muted" style={{ marginTop: -6 }}>

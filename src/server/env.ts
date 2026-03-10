@@ -9,8 +9,8 @@ function optionalNonEmptyString() {
 }
 
 const envSchema = z.object({
-  TELEGRAM_BOT_TOKEN: optionalNonEmptyString(),
-  DEV_TELEGRAM_USER_ID: optionalNonEmptyString(),
+  // Optional fixed user id for demos (all visitors share one user)
+  DEV_USER_ID: optionalNonEmptyString(),
 
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
@@ -37,15 +37,6 @@ export type Env = z.infer<typeof envSchema> & { LLM_PROVIDER: "groq" | "openai" 
 
 let cached: z.infer<typeof envSchema> | null = null;
 
-export type AppMode = "telegram" | "demo" | "restricted";
-
-function getNonEmptyProcessEnv(name: string): string | undefined {
-  const value = process.env[name];
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
-
 export function getEnv(): Env {
   if (cached) {
     const provider = (cached.LLM_PROVIDER ?? (cached.GROQ_API_KEY ? "groq" : "openai")) as "groq" | "openai";
@@ -55,13 +46,6 @@ export function getEnv(): Env {
   if (!parsed.success) {
     const message = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
     throw new Error(`Invalid env: ${message}`);
-  }
-  if (
-    process.env.NODE_ENV !== "development" &&
-    !parsed.data.TELEGRAM_BOT_TOKEN &&
-    !parsed.data.DEV_TELEGRAM_USER_ID
-  ) {
-    throw new Error("Invalid env: set TELEGRAM_BOT_TOKEN (Telegram auth) or DEV_TELEGRAM_USER_ID (demo mode).");
   }
 
   const provider = (parsed.data.LLM_PROVIDER ?? (parsed.data.GROQ_API_KEY ? "groq" : "openai")) as "groq" | "openai";
@@ -74,16 +58,4 @@ export function getEnv(): Env {
 
   cached = parsed.data;
   return { ...(cached as z.infer<typeof envSchema>), LLM_PROVIDER: provider };
-}
-
-export function getAppMode(): AppMode {
-  // IMPORTANT:
-  // This function must be safe to call during `next build` / prerender.
-  // Do not call `getEnv()` here (it validates Supabase/LLM env and can fail the build).
-  const botToken = getNonEmptyProcessEnv("TELEGRAM_BOT_TOKEN");
-  const devUserId = getNonEmptyProcessEnv("DEV_TELEGRAM_USER_ID");
-
-  if (botToken) return "telegram";
-  if (devUserId) return "demo";
-  return "restricted";
 }
