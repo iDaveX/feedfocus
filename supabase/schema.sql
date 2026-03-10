@@ -39,6 +39,7 @@ where anon_id is null;
 
 alter table public.users alter column anon_id set not null;
 create unique index if not exists users_anon_id_key on public.users (anon_id);
+create unique index if not exists users_anon_id_idx on public.users (anon_id);
 
 create table if not exists public.analyses (
   id uuid primary key default gen_random_uuid(),

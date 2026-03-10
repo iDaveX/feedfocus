@@ -60,7 +60,11 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
       });
       const data = (await res.json()) as { analysisId?: string; message?: string };
       if (!res.ok) {
-        setError(data.message ?? "Не удалось выполнить анализ.");
+        if (res.status >= 500) {
+          setError("Ошибка анализа. Попробуйте ещё раз.");
+        } else {
+          setError(data.message ?? "Не удалось выполнить анализ.");
+        }
         return;
       }
       if (!data.analysisId) {
