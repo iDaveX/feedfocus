@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import Link from "next/link";
 import "./globals.css";
+import PosthogInit from "@/src/app/PosthogInit";
 
 export const metadata = {
   title: "FeedFocus",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body>
         <main className="container">
+          <PosthogInit />
           <div className="topbar">
             <div className="brand">
               <Link href="/">FeedFocus</Link>

@@ -6,6 +6,7 @@ import { getTelegramInitData } from "@/src/client/telegram";
 import { trackEvent } from "@/src/client/track";
 import type { AnalysisListItem } from "@/src/shared/api";
 import type { AppMode } from "@/src/server/env";
+import { posthog } from "@/src/lib/posthog";
 
 function parseFeedbackItems(raw: string, maxItems: number): string[] {
   const normalized = raw.replace(/\r\n/g, "\n").trim();
@@ -44,6 +45,7 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
     void (async () => {
       try {
         await trackEvent("user_open_app", {});
+        posthog.capture("visit");
         const initData = getTelegramInitData();
         const res = await fetch("/api/analyses", {
           headers: initData ? { "x-telegram-init-data": initData } : {}
@@ -61,6 +63,7 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
     setError(null);
     setIsLoading(true);
     try {
+      posthog.capture("analysis_started", { items: items.length });
       const initData = getTelegramInitData();
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -79,6 +82,7 @@ export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; ma
         setError("Не удалось получить ID анализа.");
         return;
       }
+      posthog.capture("analysis_completed", { analysisId: data.analysisId, items: items.length });
       window.location.href = `/analysis/${data.analysisId}`;
     } catch {
       setError("Сеть/сервер недоступны. Попробуйте ещё раз.");
