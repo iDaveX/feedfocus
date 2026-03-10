@@ -241,3 +241,78 @@ select {
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
+
+.desktopOnly {
+  display: block;
+}
+
+.mobileOnly {
+  display: none;
+}
+
+.compactCard {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 768px) {
+  .container,
+  main {
+    padding: 12px;
+  }
+
+  .topbar {
+    padding: 10px 12px;
+    border-radius: 12px;
+    top: 10px;
+  }
+
+  .nav {
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .card {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  textarea {
+    min-height: 180px;
+    padding: 10px;
+  }
+
+  button {
+    padding: 9px 12px;
+  }
+
+  .pill {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .kpi {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px 8px;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: block;
+  }
+}

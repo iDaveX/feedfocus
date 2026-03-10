@@ -50,7 +50,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
     setError(null);
     setIsLoading(true);
     try {
-      posthog.capture("analysis_started", { items: items.length });
+      posthog.capture("analysis_started", { items_count: items.length });
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: {
@@ -60,6 +60,10 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
       });
       const data = (await res.json()) as { analysisId?: string; message?: string };
       if (!res.ok) {
+        posthog.capture("analysis_failed", {
+          items_count: items.length,
+          error_message: data.message ?? `HTTP ${res.status}`
+        });
         // Show API-provided message if present (helps debugging production issues).
         if (data.message) {
           setError(data.message);
@@ -69,12 +73,17 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         return;
       }
       if (!data.analysisId) {
+        posthog.capture("analysis_failed", {
+          items_count: items.length,
+          error_message: "missing analysisId"
+        });
         setError("Не удалось получить ID анализа.");
         return;
       }
-      posthog.capture("analysis_completed", { analysisId: data.analysisId, items: items.length });
+      posthog.capture("analysis_completed", { analysisId: data.analysisId, items_count: items.length });
       window.location.href = `/analysis/${data.analysisId}`;
     } catch {
+      posthog.capture("analysis_failed", { items_count: items.length, error_message: "network_error" });
       setError("Сеть/сервер недоступны. Попробуйте ещё раз.");
     } finally {
       setIsLoading(false);

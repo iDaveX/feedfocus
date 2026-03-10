@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import type { AnalysisDetails } from "@/src/shared/api";
+import { posthog } from "@/src/lib/posthog";
 
 const CJM_STAGE_RU: Record<string, string> = {
   Acquisition: "Привлечение",
@@ -28,6 +29,7 @@ export default function AnalysisPage() {
   const [data, setData] = useState<AnalysisDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openPainPointId, setOpenPainPointId] = useState<string | null>(null);
+  const trackedViewed = useRef(false);
 
   const painPointsSorted = useMemo(() => {
     if (!data) return [];
@@ -51,6 +53,16 @@ export default function AnalysisPage() {
       }
     })();
   }, [id]);
+
+  useEffect(() => {
+    if (!data) return;
+    if (trackedViewed.current) return;
+    trackedViewed.current = true;
+    posthog.capture("analysis_viewed", {
+      analysisId: data.analysis.id,
+      pain_points_count: data.painPoints.length
+    });
+  }, [data]);
 
   if (error) {
     return (
@@ -89,56 +101,103 @@ export default function AnalysisPage() {
 
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Проблемы (pain points)</h3>
-        <table className="table compactTable" style={{ marginTop: 10 }}>
-          <thead>
-            <tr>
-              <th>Проблема</th>
-              <th>Отзывов</th>
-              <th>Этап CJM</th>
-              <th>Серьёзность</th>
-            </tr>
-          </thead>
-          <tbody>
-            {painPointsSorted.map((p) => {
-              const isOpen = openPainPointId === p.id;
-              const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
-              const sev = SEVERITY_RU[p.severity] ?? p.severity;
-              return (
-                <Fragment key={p.id}>
-                  <tr className="rowClickable" onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
-                    <td style={{ fontWeight: 700 }}>
-                      {p.title}{" "}
-                      <span className="muted" style={{ fontWeight: 500 }}>
-                        {isOpen ? "▲" : "▼"}
-                      </span>
-                    </td>
-                    <td className="muted">{p.evidenceCount}</td>
-                    <td className="muted">{stage}</td>
-                    <td className="muted">{sev}</td>
-                  </tr>
-                  {isOpen ? (
-                    <tr className="rowDetails">
-                      <td colSpan={4}>
-                        <div className="detailsBox">
-                          <div className="muted feedback-text">{p.summary}</div>
-                          {p.quotes.length > 0 ? (
-                            <ul style={{ margin: "10px 0 0", paddingLeft: 16 }}>
-                              {p.quotes.slice(0, 3).map((q, i) => (
-                                <li key={i} className="muted feedback-text">
-                                  {q}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : null}
-                        </div>
+        <div className="desktopOnly">
+          <table className="table compactTable" style={{ marginTop: 10 }}>
+            <thead>
+              <tr>
+                <th>Проблема</th>
+                <th>Отзывов</th>
+                <th>Этап CJM</th>
+                <th>Серьёзность</th>
+              </tr>
+            </thead>
+            <tbody>
+              {painPointsSorted.map((p) => {
+                const isOpen = openPainPointId === p.id;
+                const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
+                const sev = SEVERITY_RU[p.severity] ?? p.severity;
+                return (
+                  <Fragment key={p.id}>
+                    <tr className="rowClickable" onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
+                      <td style={{ fontWeight: 700 }}>
+                        {p.title}{" "}
+                        <span className="muted" style={{ fontWeight: 500 }}>
+                          {isOpen ? "▲" : "▼"}
+                        </span>
                       </td>
+                      <td className="muted">{p.evidenceCount}</td>
+                      <td className="muted">{stage}</td>
+                      <td className="muted">{sev}</td>
                     </tr>
-                  ) : null}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                    {isOpen ? (
+                      <tr className="rowDetails">
+                        <td colSpan={4}>
+                          <div className="detailsBox">
+                            <div className="muted feedback-text">{p.summary}</div>
+                            {p.quotes.length > 0 ? (
+                              <ul style={{ margin: "10px 0 0", paddingLeft: 16 }}>
+                                {p.quotes.slice(0, 3).map((q, i) => (
+                                  <li key={i} className="muted feedback-text">
+                                    {q}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mobileOnly" style={{ marginTop: 10 }}>
+          {painPointsSorted.map((p) => {
+            const isOpen = openPainPointId === p.id;
+            const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
+            const sev = SEVERITY_RU[p.severity] ?? p.severity;
+            return (
+              <div className="compactCard" key={p.id}>
+                <div style={{ fontWeight: 800 }}>{p.title}</div>
+                <div className="muted" style={{ marginTop: 8 }}>
+                  <div>
+                    <b style={{ color: "var(--text)" }}>Отзывов:</b> {p.evidenceCount}
+                  </div>
+                  <div style={{ marginTop: 4 }}>
+                    <b style={{ color: "var(--text)" }}>Этап CJM:</b> {stage}
+                  </div>
+                  <div style={{ marginTop: 4 }}>
+                    <b style={{ color: "var(--text)" }}>Серьёзность:</b> {sev}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 10 }}>
+                  <button onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
+                    {isOpen ? "Скрыть детали" : "Показать детали"}
+                  </button>
+                </div>
+
+                {isOpen ? (
+                  <div className="detailsBox" style={{ marginTop: 10 }}>
+                    <div className="muted feedback-text">{p.summary}</div>
+                    {p.quotes.length > 0 ? (
+                      <ul style={{ margin: "10px 0 0", paddingLeft: 16 }}>
+                        {p.quotes.slice(0, 3).map((q, i) => (
+                          <li key={i} className="muted feedback-text">
+                            {q}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );

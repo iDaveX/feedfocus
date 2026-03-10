@@ -111,7 +111,7 @@ export default function HypothesesPage() {
       {data.hypotheses.map((h) => (
         <div className="card" key={h.id}>
           <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ flex: 1, minWidth: 260 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>{h.title}</div>
               <div className="muted feedback-text" style={{ marginTop: 6 }}>
                 {h.hypothesis}
@@ -124,7 +124,7 @@ export default function HypothesesPage() {
           </div>
 
           <div className="row" style={{ marginTop: 12, justifyContent: "space-between" }}>
-            <div className="muted" style={{ minWidth: 260, overflowWrap: "anywhere" }}>
+            <div className="muted" style={{ minWidth: 0, overflowWrap: "anywhere" }}>
               Связано с: {painPointById.get(h.painPointId) ?? "—"}
             </div>
             <div className="row">
