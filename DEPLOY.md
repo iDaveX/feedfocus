@@ -5,7 +5,7 @@
 1. Create an account on Vercel.
 2. Connect GitHub.
 3. Import the repository.
-4. In **Root Directory**, set `feedfocus`.
+4. Keep **Root Directory** as default (repo root).
 
 ## 2) Set build settings
 
@@ -19,14 +19,14 @@ Vercel should auto-detect Next.js.
 
 In Vercel → Project → Settings → Environment Variables, add variables from:
 
-- `feedfocus/.env.production.example`
+- `.env.production.example`
 
 Minimum required for the MVP flow:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `GROQ_API_KEY`
-- `TELEGRAM_BOT_TOKEN` (required for Telegram mini-app auth)
+- `DEV_TELEGRAM_USER_ID` (recommended for browser-only public testing)
 
 Recommended:
 
@@ -37,6 +37,7 @@ Recommended:
 
 Optional:
 
+- `TELEGRAM_BOT_TOKEN` (required for Telegram mini-app auth)
 - `CRON_SECRET` (to enable `GET /api/cron/purge?secret=...`)
 
 ## 4) Deploy
