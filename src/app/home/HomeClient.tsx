@@ -118,8 +118,8 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
             <thead>
               <tr>
                 <th>Дата</th>
-                <th>Pain points</th>
-                <th>Hypotheses</th>
+                <th>Проблемы</th>
+                <th>Гипотезы</th>
                 <th />
               </tr>
             </thead>

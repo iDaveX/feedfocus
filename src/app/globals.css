@@ -151,6 +151,32 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.compactTable th,
+.compactTable td {
+  padding: 8px 10px;
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+.rowClickable:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rowDetails td {
+  border-bottom: 1px solid var(--border);
+  padding-top: 0;
+}
+
+.detailsBox {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .table th {
   color: var(--muted);
   font-weight: 600;

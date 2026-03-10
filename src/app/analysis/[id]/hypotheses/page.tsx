@@ -7,6 +7,18 @@ import type { AnalysisDetails, HypothesisStatus } from "@/src/shared/api";
 import { trackEvent } from "@/src/client/track";
 
 const STATUSES: HypothesisStatus[] = ["new", "testing", "validated", "rejected"];
+const STATUS_RU: Record<HypothesisStatus, string> = {
+  new: "новая",
+  testing: "тестируется",
+  validated: "подтверждена",
+  rejected: "отклонена"
+};
+
+const LEVEL_RU: Record<string, string> = {
+  low: "низкий",
+  medium: "средний",
+  high: "высокий"
+};
 
 export default function HypothesesPage() {
   const params = useParams<{ id: string }>();
@@ -87,7 +99,7 @@ export default function HypothesesPage() {
           <div>
             <h2 style={{ margin: 0 }}>Гипотезы</h2>
             <div className="muted" style={{ marginTop: 6 }}>
-              {data.hypotheses.length} hypotheses · статус можно менять вручную
+              {data.hypotheses.length} гипотез · статус можно менять вручную
             </div>
           </div>
           <Link href={`/analysis/${analysisId}`} className="muted">
@@ -106,20 +118,20 @@ export default function HypothesesPage() {
               </div>
             </div>
             <div className="row" style={{ gap: 10, alignItems: "flex-start" }}>
-              <div className="pill">Impact: {h.expectedImpact}</div>
-              <div className="pill">Confidence: {h.confidence}</div>
+              <div className="pill">Эффект: {LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</div>
+              <div className="pill">Уверенность: {LEVEL_RU[h.confidence] ?? h.confidence}</div>
             </div>
           </div>
 
           <div className="row" style={{ marginTop: 12, justifyContent: "space-between" }}>
             <div className="muted" style={{ minWidth: 260, overflowWrap: "anywhere" }}>
-              Related: {painPointById.get(h.painPointId) ?? "—"}
+              Связано с: {painPointById.get(h.painPointId) ?? "—"}
             </div>
             <div className="row">
               <select value={h.status} onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}>
                 {STATUSES.map((s) => (
                   <option value={s} key={s}>
-                    {s}
+                    {STATUS_RU[s]}
                   </option>
                 ))}
               </select>
