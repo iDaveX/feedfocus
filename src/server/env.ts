@@ -39,6 +39,13 @@ let cached: z.infer<typeof envSchema> | null = null;
 
 export type AppMode = "telegram" | "demo" | "restricted";
 
+function getNonEmptyProcessEnv(name: string): string | undefined {
+  const value = process.env[name];
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function getEnv(): Env {
   if (cached) {
     const provider = (cached.LLM_PROVIDER ?? (cached.GROQ_API_KEY ? "groq" : "openai")) as "groq" | "openai";
@@ -70,8 +77,13 @@ export function getEnv(): Env {
 }
 
 export function getAppMode(): AppMode {
-  const env = getEnv();
-  if (env.TELEGRAM_BOT_TOKEN) return "telegram";
-  if (env.DEV_TELEGRAM_USER_ID) return "demo";
+  // IMPORTANT:
+  // This function must be safe to call during `next build` / prerender.
+  // Do not call `getEnv()` here (it validates Supabase/LLM env and can fail the build).
+  const botToken = getNonEmptyProcessEnv("TELEGRAM_BOT_TOKEN");
+  const devUserId = getNonEmptyProcessEnv("DEV_TELEGRAM_USER_ID");
+
+  if (botToken) return "telegram";
+  if (devUserId) return "demo";
   return "restricted";
 }
