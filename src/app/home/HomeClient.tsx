@@ -22,13 +22,12 @@ function parseFeedbackItems(raw: string, maxItems: number): string[] {
   return lines.slice(0, maxItems);
 }
 
-export default function HomeClient({ appMode }: { appMode: AppMode }) {
+export default function HomeClient({ appMode, maxItems }: { appMode: AppMode; maxItems: number }) {
   const [raw, setRaw] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<AnalysisListItem[]>([]);
 
-  const maxItems = Number(process.env.NEXT_PUBLIC_MAX_FEEDBACK_ITEMS ?? "50");
   const items = useMemo(() => parseFeedbackItems(raw, maxItems), [raw, maxItems]);
 
   useEffect(() => {
@@ -160,4 +159,3 @@ export default function HomeClient({ appMode }: { appMode: AppMode }) {
     </>
   );
 }
-
