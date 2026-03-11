@@ -5,9 +5,10 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
 export function middleware(req: NextRequest) {
   const devUserId = process.env.DEV_USER_ID?.trim();
+  const incomingHeader = req.headers.get("x-ff-uid")?.trim();
   const existing = req.cookies.get(COOKIE_NAME)?.value?.trim();
 
-  const value = devUserId || existing || crypto.randomUUID();
+  const value = devUserId || incomingHeader || existing || crypto.randomUUID();
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-ff-uid", value);
   const res = NextResponse.next({
