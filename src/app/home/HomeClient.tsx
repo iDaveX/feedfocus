@@ -275,9 +275,9 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
   return (
     <>
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Анализируйте фидбек. Находите инсайты. Проверяйте гипотезы.</h2>
-        <p className="muted" style={{ marginTop: -6 }}>
-          FeedFocus собирает главное из отзывов пользователей и помогает быстрее переходить от наблюдений к действиям.
+        <h2 style={{ marginTop: 0 }}>Генератор продуктовых инсайтов</h2>
+        <p className="muted" style={{ marginTop: -6, whiteSpace: "pre-line" }}>
+          {"Анализируйте фидбек. Находите инсайты. Проверяйте гипотезы.\nFeedFocus собирает главное из отзывов пользователей и помогает быстрее переходить от наблюдений к действиям."}
         </p>
         {error ? <div className="error">{error}</div> : null}
 
