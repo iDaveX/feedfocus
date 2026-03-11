@@ -403,10 +403,10 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
               <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
                 <span className="muted">Можно вставить отзывы вручную или загрузить пример файла.</span>
                 <div className="row" style={{ gap: 8 }}>
-                  <button type="button" className="secondaryAction" onClick={() => setRaw(EXAMPLE_INPUT)}>
+                  <button type="button" className="actionButton secondaryAction" onClick={() => setRaw(EXAMPLE_INPUT)}>
                     Подставить пример
                   </button>
-                  <a href="/samples/feedfocus-sample-reviews.xlsx" download className="sampleLink">
+                  <a href="/samples/feedfocus-sample-reviews.xlsx" download className="actionButton secondaryAction sampleLink">
                     Скачать пример Excel
                   </a>
                 </div>
