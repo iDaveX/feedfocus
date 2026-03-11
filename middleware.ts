@@ -8,7 +8,13 @@ export function middleware(req: NextRequest) {
   const existing = req.cookies.get(COOKIE_NAME)?.value?.trim();
 
   const value = devUserId || existing || crypto.randomUUID();
-  const res = NextResponse.next();
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-ff-uid", value);
+  const res = NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
 
   // Make it readable by the browser (PostHog distinct_id) and sent to API requests.
   // Always (re)sets to ensure a long-lived cookie (migrates old session cookies to persistent).

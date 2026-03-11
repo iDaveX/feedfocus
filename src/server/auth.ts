@@ -10,8 +10,9 @@ export type AuthedUser = {
 
 export async function requireUser(req: NextRequest): Promise<AuthedUser> {
   const env = getEnv();
+  const headerId = req.headers.get("x-ff-uid")?.trim();
   const cookieId = req.cookies.get("ff_uid")?.value?.trim();
-  const anonId = env.DEV_USER_ID?.trim() || cookieId || crypto.randomUUID();
+  const anonId = env.DEV_USER_ID?.trim() || headerId || cookieId || crypto.randomUUID();
 
   const supabase = getSupabaseAdmin();
   const upsert = await supabase
