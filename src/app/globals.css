@@ -299,7 +299,8 @@ input[type="file"] {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  font-size: 14px;
+  font-size: inherit;
+  line-height: 1.2;
   font-weight: 600;
 }
 
