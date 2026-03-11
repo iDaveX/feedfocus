@@ -400,9 +400,9 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
               onChange={(e) => setRaw(e.target.value)}
             />
             <div className="exampleBox">
-              <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-                <span className="muted">Можно вставить отзывы вручную или загрузить пример файла.</span>
-                <div className="row" style={{ gap: 8 }}>
+              <div className="exampleActionsRow">
+                <span className="muted exampleActionsText">Можно вставить отзывы вручную или загрузить пример файла.</span>
+                <div className="exampleActionsButtons">
                   <button type="button" className="actionButton secondaryAction" onClick={() => setRaw(EXAMPLE_INPUT)}>
                     Подставить пример
                   </button>

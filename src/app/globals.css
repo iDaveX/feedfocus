@@ -324,6 +324,25 @@ input[type="file"] {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.exampleActionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exampleActionsText {
+  flex: 1;
+  min-width: 0;
+}
+
+.exampleActionsButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
 .exampleTitle {
   font-size: 13px;
   font-weight: 700;
@@ -432,6 +451,20 @@ input[type="file"] {
 
   .exampleBox {
     padding: 10px;
+  }
+
+  .exampleActionsRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .exampleActionsButtons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .actionButton {
+    width: 100%;
   }
 
   .loadingPanel,
