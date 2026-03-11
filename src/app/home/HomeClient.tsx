@@ -260,7 +260,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Добавьте отзывы пользователей</h2>
         <p className="muted" style={{ marginTop: -6 }}>
-          1 строка = 1 отзыв. До {maxItems} отзывов за анализ. Лимит: 30 анализов в день.
+          1 строка = 1 отзыв. До {maxItems} отзывов за анализ.
         </p>
         {error ? <div className="error">{error}</div> : null}
 
@@ -276,7 +276,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         {mode === "text" ? (
           <div style={{ marginTop: 12 }}>
             <textarea
-              placeholder="Например:\nПриложение долго открывается\nПоддержка отвечает через сутки\nНе могу найти где изменить тариф"
+              placeholder="Ввод комментариев"
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
             />

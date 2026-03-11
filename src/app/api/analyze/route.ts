@@ -54,21 +54,6 @@ export async function POST(req: NextRequest) {
       return jsonError(`Слишком много отзывов. Максимум: ${env.MAX_FEEDBACK_ITEMS}.`, 400);
     }
 
-    // Daily limit
-    const startOfDayUtc = new Date();
-    startOfDayUtc.setUTCHours(0, 0, 0, 0);
-    const countRes = await supabase
-      .from("analyses")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.userId)
-      .gte("created_at", startOfDayUtc.toISOString());
-    if (countRes.error) return jsonError(`DB error: ${countRes.error.message}`, 500);
-
-    const used = countRes.count ?? 0;
-    if (used >= env.DAILY_ANALYZE_LIMIT) {
-      return jsonError("Вы достигли дневного лимита анализов. Попробуйте снова завтра.", 429);
-    }
-
     await supabase.from("events").insert({ user_id: user.userId, name: "analysis_created", meta: { items: items.length } });
 
     let result: Awaited<ReturnType<typeof analyzeFeedback>>;

@@ -26,7 +26,6 @@ const envSchema = z.object({
   OPENAI_API_KEY: optionalNonEmptyString(),
   OPENAI_MODEL: z.string().min(1).default("gpt-4.1-mini"),
 
-  DAILY_ANALYZE_LIMIT: z.coerce.number().int().positive().default(5),
   MAX_FEEDBACK_ITEMS: z.coerce.number().int().positive().max(200).default(200),
   RETENTION_DAYS: z.coerce.number().int().positive().default(30),
 
