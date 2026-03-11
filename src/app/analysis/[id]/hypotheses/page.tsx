@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { authFetch } from "@/src/client/anon";
+import { readAnalysisCache } from "@/src/client/analysisCache";
 import type { AnalysisDetails, HypothesisStatus } from "@/src/shared/api";
 import { trackEvent } from "@/src/client/track";
 
@@ -28,6 +29,13 @@ export default function HypothesesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cached = readAnalysisCache(analysisId);
+    const hasCached = Boolean(cached);
+    if (cached) {
+      setData(cached);
+      setError(null);
+    }
+
     void (async () => {
       try {
         const res = await authFetch(`/api/analyses/${analysisId}`, {
@@ -35,12 +43,16 @@ export default function HypothesesPage() {
         });
         const json = (await res.json()) as AnalysisDetails | { message?: string };
         if (!res.ok) {
-          setError((json as { message?: string }).message ?? "Не удалось загрузить.");
+          if (!hasCached) {
+            setError((json as { message?: string }).message ?? "Не удалось загрузить.");
+          }
           return;
         }
         setData(json as AnalysisDetails);
       } catch {
-        setError("Сеть/сервер недоступны.");
+        if (!hasCached) {
+          setError("Сеть/сервер недоступны.");
+        }
       }
     })();
   }, [analysisId]);

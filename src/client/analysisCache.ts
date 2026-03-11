@@ -19,3 +19,8 @@ export function readAnalysisCache(id: string): AnalysisDetails | null {
     return null;
   }
 }
+
+export function hasAnalysisCache(id: string): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(sessionStorage.getItem(`${PREFIX}${id}`));
+}
