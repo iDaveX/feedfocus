@@ -26,6 +26,24 @@ const PRIORITY_RU: Record<string, string> = {
   high: "высокая"
 };
 
+function formatMainInsight(value: string | null | undefined, fallbackTitle?: string) {
+  const raw = value?.trim();
+  if (!raw) {
+    return fallbackTitle ? `Главная проблема пользователей — ${fallbackTitle}.` : "—";
+  }
+
+  const normalized = raw.replace(/\s+/g, " ").trim();
+  const firstSentenceMatch = normalized.match(/^(.+?[.!?])(?:\s|$)/);
+  const firstSentence = firstSentenceMatch?.[1]?.trim() ?? normalized;
+
+  if (firstSentence.length <= 180) {
+    return firstSentence;
+  }
+
+  const clipped = firstSentence.slice(0, 177).trimEnd();
+  return clipped.endsWith(".") ? clipped : `${clipped}…`;
+}
+
 export default function AnalysisPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -144,8 +162,7 @@ export default function AnalysisPage() {
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Главный инсайт</h3>
         <div className="muted feedback-text">
-          {data.analysis.mainInsight?.trim() ||
-            (painPointsSorted[0]?.title ? `Главная проблема пользователей — ${painPointsSorted[0].title}.` : "—")}
+          {formatMainInsight(data.analysis.mainInsight, painPointsSorted[0]?.title)}
         </div>
       </div>
 
