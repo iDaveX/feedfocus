@@ -23,12 +23,26 @@ const LEVEL_RU: Record<string, string> = {
   high: "высокий"
 };
 
+const IMPACT_ORDER: Record<string, number> = {
+  high: 0,
+  medium: 1,
+  low: 2
+};
+
+const STATUS_ORDER: Record<HypothesisStatus, number> = {
+  testing: 0,
+  new: 1,
+  validated: 2,
+  rejected: 3
+};
+
 export default function HypothesesPage() {
   const params = useParams<{ id: string }>();
   const analysisId = params.id;
   const [data, setData] = useState<AnalysisDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [openHypothesisId, setOpenHypothesisId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"impact" | "status" | "title">("impact");
 
   useEffect(() => {
     const cached = readAnalysisCache(analysisId);
@@ -67,8 +81,24 @@ export default function HypothesesPage() {
 
   const hypothesesSorted = useMemo(() => {
     if (!data) return [];
-    return [...data.hypotheses];
-  }, [data]);
+    return [...data.hypotheses].sort((a, b) => {
+      if (sortBy === "impact") {
+        return (
+          (IMPACT_ORDER[a.expectedImpact] ?? 99) - (IMPACT_ORDER[b.expectedImpact] ?? 99) ||
+          (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99) ||
+          a.title.localeCompare(b.title, "ru")
+        );
+      }
+      if (sortBy === "status") {
+        return (
+          (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99) ||
+          (IMPACT_ORDER[a.expectedImpact] ?? 99) - (IMPACT_ORDER[b.expectedImpact] ?? 99) ||
+          a.title.localeCompare(b.title, "ru")
+        );
+      }
+      return a.title.localeCompare(b.title, "ru");
+    });
+  }, [data, sortBy]);
 
   async function onDownloadHypotheses() {
     if (!data) return;
@@ -129,6 +159,11 @@ export default function HypothesesPage() {
             </div>
           </div>
           <div className="row">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as "impact" | "status" | "title")}>
+              <option value="impact">Сортировка: по эффекту</option>
+              <option value="status">Сортировка: по статусу</option>
+              <option value="title">Сортировка: по названию</option>
+            </select>
             {hasAnalysisCache(analysisId) ? <button onClick={() => void onDownloadHypotheses()}>Скачать отчет</button> : null}
             <Link href={`/analysis/${analysisId}`} className="muted">
               ← Результаты анализа
@@ -162,6 +197,7 @@ export default function HypothesesPage() {
                       <td className="muted">{LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</td>
                       <td>
                         <select
+                          className={`statusSelect status-${h.status}`}
                           value={h.status}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}
@@ -208,7 +244,11 @@ export default function HypothesesPage() {
                   <button onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
                     {isOpen ? "Скрыть детали" : "Показать детали"}
                   </button>
-                  <select value={h.status} onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}>
+                  <select
+                    className={`statusSelect status-${h.status}`}
+                    value={h.status}
+                    onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}
+                  >
                     {STATUSES.map((s) => (
                       <option value={s} key={s}>
                         {STATUS_RU[s]}
