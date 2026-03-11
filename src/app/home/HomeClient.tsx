@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { authFetch } from "@/src/client/anon";
 import { trackEvent } from "@/src/client/track";
 import type { AnalysisListItem } from "@/src/shared/api";
 import { posthog } from "@/src/lib/posthog";
@@ -163,7 +164,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
       try {
         await trackEvent("user_open_app", {});
         posthog.capture("visit");
-        const res = await fetch("/api/analyses", {
+        const res = await authFetch("/api/analyses", {
           headers: {}
         });
         if (!res.ok) return;
@@ -215,7 +216,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
     setIsLoading(true);
     try {
       posthog.capture("analysis_started", { items_count: items.length });
-      const res = await fetch("/api/analyze", {
+      const res = await authFetch("/api/analyze", {
         method: "POST",
         headers: {
           "content-type": "application/json"

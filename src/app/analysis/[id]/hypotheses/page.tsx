@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { authFetch } from "@/src/client/anon";
 import type { AnalysisDetails, HypothesisStatus } from "@/src/shared/api";
 import { trackEvent } from "@/src/client/track";
 
@@ -29,7 +30,7 @@ export default function HypothesesPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const res = await fetch(`/api/analyses/${analysisId}`, {
+        const res = await authFetch(`/api/analyses/${analysisId}`, {
           headers: {}
         });
         const json = (await res.json()) as AnalysisDetails | { message?: string };
@@ -52,7 +53,7 @@ export default function HypothesesPage() {
 
   async function setStatus(hypothesisId: string, status: HypothesisStatus) {
     try {
-      const res = await fetch(`/api/hypotheses/${hypothesisId}`, {
+      const res = await authFetch(`/api/hypotheses/${hypothesisId}`, {
         method: "PATCH",
         headers: {
           "content-type": "application/json"

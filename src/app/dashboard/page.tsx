@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { authFetch } from "@/src/client/anon";
 import type { DashboardData } from "@/src/shared/api";
 
 const CJM_STAGE_RU: Record<string, string> = {
@@ -28,7 +29,7 @@ export default function DashboardPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const res = await fetch(`/api/dashboard`, {
+        const res = await authFetch(`/api/dashboard`, {
           headers: {}
         });
         const json = (await res.json()) as DashboardData | { message?: string };

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import { authFetch } from "@/src/client/anon";
 import type { AnalysisDetails } from "@/src/shared/api";
 import { posthog } from "@/src/lib/posthog";
 
@@ -42,7 +43,7 @@ export default function AnalysisPage() {
     void (async () => {
       for (let attempt = 0; attempt < 6; attempt++) {
         try {
-          const res = await fetch(`/api/analyses/${id}`, {
+          const res = await authFetch(`/api/analyses/${id}`, {
             headers: {},
             cache: "no-store"
           });

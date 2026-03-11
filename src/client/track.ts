@@ -1,3 +1,5 @@
+import { authFetch } from "@/src/client/anon";
+
 let sessionId: string | null = null;
 
 function getSessionId(): string {
@@ -24,7 +26,7 @@ export async function trackEvent(name: string, meta: Record<string, unknown>) {
     }
   };
 
-  await fetch("/api/events", {
+  await authFetch("/api/events", {
     method: "POST",
     headers: {
       "content-type": "application/json"
