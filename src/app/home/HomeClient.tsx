@@ -406,8 +406,8 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
                   <button type="button" className="secondaryAction" onClick={() => setRaw(EXAMPLE_INPUT)}>
                     Подставить пример
                   </button>
-                  <a href="/samples/feedfocus-sample-reviews.xlsx" download className="sampleLink">
-                    Скачать пример Excel
+                  <a href="/samples/feedfocus-sample-reviews.xlsx" download className="sampleLink secondaryAction">
+                    Скачать пример
                   </a>
                 </div>
               </div>

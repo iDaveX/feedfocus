@@ -297,7 +297,6 @@ input[type="file"] {
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   font-size: 14px;
   font-weight: 600;
