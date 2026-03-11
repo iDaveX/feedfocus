@@ -275,9 +275,9 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
   return (
     <>
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Превратите пользовательский фидбек в продуктовые гипотезы</h2>
+        <h2 style={{ marginTop: 0 }}>Анализируйте фидбек. Находите инсайты. Проверяйте гипотезы.</h2>
         <p className="muted" style={{ marginTop: -6 }}>
-          FeedFocus анализирует отзывы, выделяет ключевые проблемы пользователей и помогает быстро собрать гипотезы для проверки.
+          FeedFocus собирает главное из отзывов пользователей и помогает быстрее переходить от наблюдений к действиям.
         </p>
         {error ? <div className="error">{error}</div> : null}
 
