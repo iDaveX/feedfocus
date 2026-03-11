@@ -23,6 +23,10 @@ function formatErrorDetails(err: unknown): string {
   return `${err.name}: ${err.message}${causePart}`;
 }
 
+function isMissingMainInsightColumn(message?: string | null) {
+  return Boolean(message && message.includes("main_insight") && message.includes("schema cache"));
+}
+
 export async function POST(req: NextRequest) {
   const env = getEnv();
   try {
@@ -78,19 +82,30 @@ export async function POST(req: NextRequest) {
       throw e;
     }
 
-    const analysisIns = await supabase
-      .from("analyses")
-      .insert({
-        user_id: user.userId,
-        input_raw: parsedBody.data.raw,
-        input_items: items,
-        main_insight: result.mainInsight,
-        model: result.model,
-        status: "completed",
-        completed_at: new Date().toISOString()
-      })
-      .select("id, created_at")
-      .single();
+    const insertPayload = {
+      user_id: user.userId,
+      input_raw: parsedBody.data.raw,
+      input_items: items,
+      main_insight: result.mainInsight,
+      model: result.model,
+      status: "completed" as const,
+      completed_at: new Date().toISOString()
+    };
+    let analysisIns = await supabase.from("analyses").insert(insertPayload).select("id, created_at").single();
+    if (analysisIns.error && isMissingMainInsightColumn(analysisIns.error.message)) {
+      analysisIns = await supabase
+        .from("analyses")
+        .insert({
+          user_id: user.userId,
+          input_raw: parsedBody.data.raw,
+          input_items: items,
+          model: result.model,
+          status: "completed",
+          completed_at: insertPayload.completed_at
+        })
+        .select("id, created_at")
+        .single();
+    }
 
     if (analysisIns.error) return jsonError(`DB error: ${analysisIns.error.message}`, 500);
 

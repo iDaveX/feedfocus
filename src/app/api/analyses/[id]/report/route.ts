@@ -7,6 +7,10 @@ import { jsonError } from "@/src/app/api/_util";
 
 export const runtime = "nodejs";
 
+function isMissingMainInsightColumn(message?: string | null) {
+  return Boolean(message && message.includes("main_insight") && message.includes("schema cache"));
+}
+
 const CJM_STAGE_RU: Record<string, string> = {
   Acquisition: "Привлечение",
   Onboarding: "Онбординг",
@@ -67,11 +71,14 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const { id } = await ctx.params;
     const supabase = getSupabaseAdmin();
 
-    const analysis = await supabase
+    let analysis = await supabase
       .from("analyses")
       .select("id, created_at, user_id, input_items, main_insight")
       .eq("id", id)
       .single();
+    if (analysis.error && isMissingMainInsightColumn(analysis.error.message)) {
+      analysis = await supabase.from("analyses").select("id, created_at, user_id, input_items").eq("id", id).single();
+    }
     if (analysis.error) return jsonError("Анализ не найден.", 404);
     const a = analysis.data as unknown as {
       id?: string;

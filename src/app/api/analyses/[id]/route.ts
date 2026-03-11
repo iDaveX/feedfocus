@@ -3,17 +3,24 @@ import { requireUser } from "@/src/server/auth";
 import { getSupabaseAdmin } from "@/src/server/supabaseAdmin";
 import { jsonError } from "@/src/app/api/_util";
 
+function isMissingMainInsightColumn(message?: string | null) {
+  return Boolean(message && message.includes("main_insight") && message.includes("schema cache"));
+}
+
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser(req);
     const { id } = await ctx.params;
     const supabase = getSupabaseAdmin();
 
-    const analysis = await supabase
+    let analysis = await supabase
       .from("analyses")
       .select("id, created_at, user_id, main_insight")
       .eq("id", id)
       .single();
+    if (analysis.error && isMissingMainInsightColumn(analysis.error.message)) {
+      analysis = await supabase.from("analyses").select("id, created_at, user_id").eq("id", id).single();
+    }
     if (analysis.error) return jsonError("Анализ не найден.", 404);
     const analysisData = analysis.data as unknown as {
       id?: string;
