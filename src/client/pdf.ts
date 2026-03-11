@@ -13,7 +13,7 @@ const CJM_STAGE_RU: Record<string, string> = {
   Other: "Другое"
 };
 
-const SEVERITY_RU: Record<string, string> = {
+const PRIORITY_RU: Record<string, string> = {
   low: "низкая",
   medium: "средняя",
   high: "высокая"
@@ -25,10 +25,11 @@ const IMPACT_RU: Record<string, string> = {
   high: "высокий"
 };
 
-const CONFIDENCE_RU: Record<string, string> = {
-  low: "низкая",
-  medium: "средняя",
-  high: "высокая"
+const STATUS_RU: Record<string, string> = {
+  new: "новая",
+  testing: "тестируется",
+  validated: "подтверждена",
+  rejected: "отклонена"
 };
 
 async function getPdfMake() {
@@ -59,7 +60,7 @@ export async function downloadAnalysisReportPdf(data: AnalysisDetails, filename:
         { text: `${idx + 1}. ${p.title}`, style: "h3", margin: [0, 8, 0, 0] },
         { text: `Упоминаний: ${p.evidenceCount}`, margin: [0, 2, 0, 0] },
         { text: `Этап CJM: ${CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage}`, margin: [0, 2, 0, 0] },
-        { text: `Серьёзность: ${SEVERITY_RU[p.severity] ?? p.severity}`, margin: [0, 2, 0, 0] },
+        { text: `Приоритет: ${PRIORITY_RU[p.severity] ?? p.severity}`, margin: [0, 2, 0, 0] },
         { text: p.summary, margin: [0, 4, 0, 0], color: "#555555" }
       ]),
       { text: "Продуктовые гипотезы", style: "h2", margin: [0, 14, 0, 0] },
@@ -67,8 +68,9 @@ export async function downloadAnalysisReportPdf(data: AnalysisDetails, filename:
         stack: [
           { text: `${idx + 1}. ${h.title}`, style: "h3", margin: [0, 8, 0, 0] },
           { text: h.hypothesis, margin: [0, 2, 0, 0] },
+          { text: `Проблема: ${data.painPoints.find((p) => p.id === h.painPointId)?.title ?? "—"}`, margin: [0, 2, 0, 0] },
           { text: `Эффект: ${IMPACT_RU[h.expectedImpact] ?? h.expectedImpact}`, margin: [0, 2, 0, 0] },
-          { text: `Уверенность: ${CONFIDENCE_RU[h.confidence] ?? h.confidence}`, margin: [0, 2, 0, 0] }
+          { text: `Статус: ${STATUS_RU[h.status] ?? h.status}`, margin: [0, 2, 0, 0] }
         ]
       }))
     ],
@@ -97,10 +99,9 @@ export async function downloadHypothesesPdf(data: AnalysisDetails, filename: str
         stack: [
           { text: `${idx + 1}. ${h.title}`, style: "h3", margin: [0, 10, 0, 0] },
           { text: h.hypothesis, margin: [0, 2, 0, 0] },
-          { text: `Связано с: ${painPointById.get(h.painPointId) ?? "—"}`, margin: [0, 2, 0, 0] },
+          { text: `Проблема: ${painPointById.get(h.painPointId) ?? "—"}`, margin: [0, 2, 0, 0] },
           { text: `Эффект: ${IMPACT_RU[h.expectedImpact] ?? h.expectedImpact}`, margin: [0, 2, 0, 0] },
-          { text: `Уверенность: ${CONFIDENCE_RU[h.confidence] ?? h.confidence}`, margin: [0, 2, 0, 0] },
-          { text: `Статус: ${h.status}`, margin: [0, 2, 0, 0] }
+          { text: `Статус: ${STATUS_RU[h.status] ?? h.status}`, margin: [0, 2, 0, 0] }
         ]
       }))
     ],

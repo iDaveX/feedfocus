@@ -20,7 +20,7 @@ const CJM_STAGE_RU: Record<string, string> = {
   Other: "Другое"
 };
 
-const SEVERITY_RU: Record<string, string> = {
+const PRIORITY_RU: Record<string, string> = {
   low: "низкая",
   medium: "средняя",
   high: "высокая"
@@ -158,14 +158,14 @@ export default function AnalysisPage() {
                 <th>Проблема</th>
                 <th>Отзывов</th>
                 <th>Этап CJM</th>
-                <th>Серьёзность</th>
+                <th>Приоритет</th>
               </tr>
             </thead>
             <tbody>
               {painPointsSorted.map((p) => {
                 const isOpen = openPainPointId === p.id;
                 const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
-                const sev = SEVERITY_RU[p.severity] ?? p.severity;
+                const sev = PRIORITY_RU[p.severity] ?? p.severity;
                 return (
                   <Fragment key={p.id}>
                     <tr className="rowClickable" onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
@@ -208,7 +208,7 @@ export default function AnalysisPage() {
           {painPointsSorted.map((p) => {
             const isOpen = openPainPointId === p.id;
             const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
-            const sev = SEVERITY_RU[p.severity] ?? p.severity;
+            const sev = PRIORITY_RU[p.severity] ?? p.severity;
             return (
               <div className="compactCard" key={p.id}>
                 <div style={{ fontWeight: 800 }}>{p.title}</div>
@@ -220,7 +220,7 @@ export default function AnalysisPage() {
                     <b style={{ color: "var(--text)" }}>Этап CJM:</b> {stage}
                   </div>
                   <div style={{ marginTop: 4 }}>
-                    <b style={{ color: "var(--text)" }}>Серьёзность:</b> {sev}
+                    <b style={{ color: "var(--text)" }}>Приоритет:</b> {sev}
                   </div>
                 </div>
 

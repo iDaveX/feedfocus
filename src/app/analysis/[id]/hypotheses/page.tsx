@@ -129,7 +129,7 @@ export default function HypothesesPage() {
             </div>
           </div>
           <div className="row">
-            {hasAnalysisCache(analysisId) ? <button onClick={() => void onDownloadHypotheses()}>Скачать гипотезы</button> : null}
+            {hasAnalysisCache(analysisId) ? <button onClick={() => void onDownloadHypotheses()}>Скачать отчет</button> : null}
             <Link href={`/analysis/${analysisId}`} className="muted">
               ← Результаты анализа
             </Link>
@@ -144,7 +144,6 @@ export default function HypothesesPage() {
               <tr>
                 <th>Гипотеза</th>
                 <th>Эффект</th>
-                <th>Уверенность</th>
                 <th>Статус</th>
               </tr>
             </thead>
@@ -161,7 +160,6 @@ export default function HypothesesPage() {
                         </span>
                       </td>
                       <td className="muted">{LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</td>
-                      <td className="muted">{LEVEL_RU[h.confidence] ?? h.confidence}</td>
                       <td>
                         <select
                           value={h.status}
@@ -178,11 +176,11 @@ export default function HypothesesPage() {
                     </tr>
                     {isOpen ? (
                       <tr className="rowDetails">
-                        <td colSpan={4}>
+                        <td colSpan={3}>
                           <div className="detailsBox">
                             <div className="muted feedback-text">{h.hypothesis}</div>
                             <div className="muted" style={{ marginTop: 8 }}>
-                              Связано с: {painPointById.get(h.painPointId) ?? "—"}
+                              Проблема: {painPointById.get(h.painPointId) ?? "—"}
                             </div>
                           </div>
                         </td>
@@ -205,9 +203,6 @@ export default function HypothesesPage() {
                   <div>
                     <b style={{ color: "var(--text)" }}>Эффект:</b> {LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}
                   </div>
-                  <div style={{ marginTop: 4 }}>
-                    <b style={{ color: "var(--text)" }}>Уверенность:</b> {LEVEL_RU[h.confidence] ?? h.confidence}
-                  </div>
                 </div>
                 <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
                   <button onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
@@ -225,7 +220,7 @@ export default function HypothesesPage() {
                   <div className="detailsBox" style={{ marginTop: 10 }}>
                     <div className="muted feedback-text">{h.hypothesis}</div>
                     <div className="muted" style={{ marginTop: 8 }}>
-                      Связано с: {painPointById.get(h.painPointId) ?? "—"}
+                      Проблема: {painPointById.get(h.painPointId) ?? "—"}
                     </div>
                   </div>
                 ) : null}
