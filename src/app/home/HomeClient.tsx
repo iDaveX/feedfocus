@@ -42,6 +42,22 @@ const HEADER_HINTS = [
   "текст"
 ];
 
+function looksLikeHeaderRow(headerRow: unknown[], nextRow?: unknown[]) {
+  const normalized = headerRow.map((cell) => normalizeCell(cell));
+  const nonEmpty = normalized.filter((value) => value.length > 0);
+  if (nonEmpty.length === 0) return false;
+
+  const hintMatch = nonEmpty.some((value) => HEADER_HINTS.some((hint) => value.toLowerCase().includes(hint)));
+  if (hintMatch) return true;
+
+  const mostlyStrings = nonEmpty.length / Math.max(headerRow.length, 1) >= 0.7;
+  const uniqueEnough = new Set(nonEmpty.map((value) => value.toLowerCase())).size === nonEmpty.length;
+  const nextNormalized = (nextRow ?? []).map((cell) => normalizeCell(cell));
+  const nextLooksData = nextNormalized.some((value) => /\d|[.!?]/.test(value));
+
+  return mostlyStrings && uniqueEnough && nextLooksData;
+}
+
 function normalizeCell(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string") return value.trim();
@@ -97,10 +113,7 @@ function parseXlsxToTable(buffer: ArrayBuffer): ParsedTable {
   if (rowsArray.length === 0) return { columns: [], rows: [] };
 
   const headerRow = rowsArray[0] as unknown[];
-  const headerLooksReal = headerRow.some((cell) => {
-    const value = normalizeCell(cell).toLowerCase();
-    return HEADER_HINTS.some((hint) => value.includes(hint));
-  });
+  const headerLooksReal = looksLikeHeaderRow(headerRow, rowsArray[1] as unknown[] | undefined);
 
   if (!headerLooksReal) {
     const maxCols = Math.max(0, ...rowsArray.map((row) => (row as unknown[]).length));

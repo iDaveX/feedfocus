@@ -40,6 +40,7 @@ export default function AnalysisPage() {
 
   useEffect(() => {
     const cached = readAnalysisCache(id);
+    const hasCached = Boolean(cached);
     if (cached) {
       setData(cached);
       setError(null);
@@ -69,10 +70,10 @@ export default function AnalysisPage() {
             continue;
           }
 
-          if (!cancelled) setError(message);
+          if (!cancelled && !hasCached) setError(message);
           return;
         } catch {
-          if (!cancelled) setError("Сеть/сервер недоступны.");
+          if (!cancelled && !hasCached) setError("Сеть/сервер недоступны.");
           return;
         }
       }
