@@ -37,21 +37,42 @@ export default function AnalysisPage() {
   }, [data]);
 
   useEffect(() => {
+    let cancelled = false;
+
     void (async () => {
-      try {
-        const res = await fetch(`/api/analyses/${id}`, {
-          headers: {}
-        });
-        const json = (await res.json()) as AnalysisDetails | { message?: string };
-        if (!res.ok) {
-          setError((json as { message?: string }).message ?? "Не удалось загрузить анализ.");
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          const res = await fetch(`/api/analyses/${id}`, {
+            headers: {},
+            cache: "no-store"
+          });
+          const json = (await res.json()) as AnalysisDetails | { message?: string };
+          if (res.ok) {
+            if (!cancelled) {
+              setData(json as AnalysisDetails);
+              setError(null);
+            }
+            return;
+          }
+
+          const message = (json as { message?: string }).message ?? "Не удалось загрузить анализ.";
+          if (res.status === 404 && attempt < 5) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            continue;
+          }
+
+          if (!cancelled) setError(message);
+          return;
+        } catch {
+          if (!cancelled) setError("Сеть/сервер недоступны.");
           return;
         }
-        setData(json as AnalysisDetails);
-      } catch {
-        setError("Сеть/сервер недоступны.");
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {

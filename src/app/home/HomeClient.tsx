@@ -28,6 +28,18 @@ type ParsedTable = {
   rows: Record<string, string>[];
 };
 
+const HEADER_HINTS = [
+  "text",
+  "review",
+  "comment",
+  "feedback",
+  "message",
+  "отзыв",
+  "комментар",
+  "фидбек",
+  "текст"
+];
+
 function normalizeCell(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string") return value.trim();
@@ -83,6 +95,26 @@ function parseXlsxToTable(buffer: ArrayBuffer): ParsedTable {
   if (rowsArray.length === 0) return { columns: [], rows: [] };
 
   const headerRow = rowsArray[0] as unknown[];
+  const headerLooksReal = headerRow.some((cell) => {
+    const value = normalizeCell(cell).toLowerCase();
+    return HEADER_HINTS.some((hint) => value.includes(hint));
+  });
+
+  if (!headerLooksReal) {
+    const maxCols = Math.max(0, ...rowsArray.map((row) => (row as unknown[]).length));
+    const columns = Array.from({ length: maxCols }, (_, i) => `Колонка ${i + 1}`);
+    const rows = rowsArray.map((r) => {
+      const normalized: Record<string, string> = {};
+      for (let i = 0; i < columns.length; i++) {
+        const col = columns[i];
+        if (!col) continue;
+        normalized[col] = normalizeCell((r as unknown[])[i]);
+      }
+      return normalized;
+    });
+    return { columns, rows };
+  }
+
   const header = headerRow.map((c, i) => {
     const cell = normalizeCell(c);
     return cell.length > 0 ? cell : `Колонка ${i + 1}`;
