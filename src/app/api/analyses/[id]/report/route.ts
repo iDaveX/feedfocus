@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import PdfPrinter from "pdfmake";
 import vfsFonts from "pdfmake/build/vfs_fonts";
-import { requireUser } from "@/src/server/auth";
 import { getSupabaseAdmin } from "@/src/server/supabaseAdmin";
 import { jsonError } from "@/src/app/api/_util";
 
@@ -67,7 +66,6 @@ function getPdfBytes(docDefinition: any): Promise<Uint8Array> {
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireUser(req);
     const { id } = await ctx.params;
     const supabase = getSupabaseAdmin();
 
@@ -83,12 +81,10 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const a = analysis.data as unknown as {
       id?: string;
       created_at?: string;
-      user_id?: string;
       input_items?: unknown;
       main_insight?: string | null;
     };
-    if (!a?.id || !a.user_id || !a.created_at) return jsonError("Анализ не найден.", 404);
-    if (a.user_id !== user.userId) return jsonError("Forbidden.", 403);
+    if (!a?.id || !a.created_at) return jsonError("Анализ не найден.", 404);
 
     const itemsCount = Array.isArray(a.input_items) ? a.input_items.length : 0;
 

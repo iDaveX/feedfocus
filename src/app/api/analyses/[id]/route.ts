@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { requireUser } from "@/src/server/auth";
 import { getSupabaseAdmin } from "@/src/server/supabaseAdmin";
 import { jsonError } from "@/src/app/api/_util";
 
@@ -9,7 +8,6 @@ function isMissingMainInsightColumn(message?: string | null) {
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const user = await requireUser(req);
     const { id } = await ctx.params;
     const supabase = getSupabaseAdmin();
 
@@ -25,11 +23,9 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const analysisData = analysis.data as unknown as {
       id?: string;
       created_at?: string;
-      user_id?: string;
       main_insight?: string | null;
     };
-    if (!analysisData?.id || !analysisData.user_id || !analysisData.created_at) return jsonError("Анализ не найден.", 404);
-    if (analysisData.user_id !== user.userId) return jsonError("Forbidden.", 403);
+    if (!analysisData?.id || !analysisData.created_at) return jsonError("Анализ не найден.", 404);
 
     const painPoints = await supabase
       .from("pain_points")
