@@ -276,9 +276,6 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
     <>
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Добавьте отзывы пользователей</h2>
-        <p className="muted" style={{ marginTop: -6 }}>
-          1 строка = 1 отзыв. До {maxItems} отзывов за анализ.
-        </p>
         {error ? <div className="error">{error}</div> : null}
 
         <div className="segmented" style={{ marginTop: 12 }}>
@@ -293,7 +290,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         {mode === "text" ? (
           <div style={{ marginTop: 12 }}>
             <textarea
-              placeholder="Ввод комментариев"
+              placeholder="Окно для ввода комментариев"
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
             />
