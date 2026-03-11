@@ -293,7 +293,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         {mode === "text" ? (
           <div style={{ marginTop: 12 }}>
             <textarea
-              placeholder="Вставьте отзывы, комментарии или сообщения поддержки"
+              placeholder="Вставьте отзывы или комментарии пользователей"
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
             />
