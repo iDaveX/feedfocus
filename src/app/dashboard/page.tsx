@@ -60,6 +60,26 @@ export default function DashboardPage() {
     );
   }
 
+  const isEmpty =
+    data.kpi.analysesPerformed === 0 &&
+    data.kpi.painPointsDetected === 0 &&
+    data.kpi.hypothesesGenerated === 0;
+
+  if (isEmpty) {
+    return (
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>Сводка анализа</h2>
+        <div className="emptyState" style={{ marginTop: 12 }}>
+          <div className="emptyStateTitle">Пока нет данных для дашборда</div>
+          <div className="muted">
+            Загрузите отзывы пользователей и выполните первый анализ — после этого здесь появятся агрегированные
+            инсайты, этапы CJM и статусы гипотез.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card">
       <h2 style={{ marginTop: 0 }}>Сводка анализа</h2>

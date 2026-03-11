@@ -290,6 +290,74 @@ input[type="file"] {
   overflow-wrap: anywhere;
 }
 
+.sampleLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.exampleBox {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.exampleTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.loadingPanel {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(122, 162, 255, 0.08);
+}
+
+.loadingTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.loadingSkeletonRow {
+  height: 10px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(122, 162, 255, 0.24), rgba(255, 255, 255, 0.06));
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+.loadingSkeletonRow.short {
+  width: 68%;
+}
+
+.emptyState {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.emptyStateTitle {
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
 .feedback-text {
   white-space: pre-wrap;
   line-height: 1.5;
@@ -310,6 +378,15 @@ input[type="file"] {
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.02);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -333,6 +410,20 @@ input[type="file"] {
     margin-top: 12px;
     padding: 12px;
     border-radius: 12px;
+  }
+
+  .sampleLink {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .exampleBox {
+    padding: 10px;
+  }
+
+  .loadingPanel,
+  .emptyState {
+    padding: 12px;
   }
 
   textarea {

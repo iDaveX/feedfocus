@@ -42,6 +42,19 @@ const HEADER_HINTS = [
   "текст"
 ];
 
+const ANALYZE_STEPS = [
+  "Анализируем отзывы...",
+  "Выделяем повторяющиеся проблемы...",
+  "Формулируем гипотезы..."
+];
+
+const EXAMPLE_INPUT = [
+  "Приложение долго открывается после обновления",
+  "Не могу быстро найти, где изменить тариф",
+  "Поддержка отвечает слишком долго",
+  "После регистрации не понимаю, что делать дальше"
+].join("\n");
+
 function looksLikeHeaderRow(headerRow: unknown[], nextRow?: unknown[]) {
   const normalized = headerRow.map((cell) => normalizeCell(cell));
   const nonEmpty = normalized.filter((value) => value.length > 0);
@@ -159,6 +172,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
   const [fileTable, setFileTable] = useState<ParsedTable | null>(null);
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [fileParseError, setFileParseError] = useState<string | null>(null);
+  const [loadingStepIndex, setLoadingStepIndex] = useState(0);
 
   const textItems = useMemo(() => parseFeedbackItems(raw, maxItems), [raw, maxItems]);
   const fileItems = useMemo(() => {
@@ -189,6 +203,19 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingStepIndex(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setLoadingStepIndex((current) => (current + 1) % ANALYZE_STEPS.length);
+    }, 1300);
+
+    return () => window.clearInterval(timer);
+  }, [isLoading]);
 
   async function onFileSelected(file: File) {
     setFileParseError(null);
@@ -281,6 +308,15 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         </p>
         {error ? <div className="error">{error}</div> : null}
 
+        <div className="row" style={{ marginTop: 12, justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div className="muted" style={{ maxWidth: 620 }}>
+            Можно вставить отзывы вручную или загрузить файл с примерами комментариев пользователей.
+          </div>
+          <a href="/samples/feedfocus-sample-reviews.xlsx" download className="sampleLink">
+            Скачать пример Excel
+          </a>
+        </div>
+
         <div className="segmented" style={{ marginTop: 12 }}>
           <button type="button" className={mode === "text" ? "active" : ""} onClick={() => setMode("text")}>
             Вставить текст
@@ -297,6 +333,15 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
               value={raw}
               onChange={(e) => setRaw(e.target.value)}
             />
+            <div className="exampleBox">
+              <div className="row" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span className="exampleTitle">Пример входных данных</span>
+                <button type="button" onClick={() => setRaw(EXAMPLE_INPUT)}>
+                  Подставить пример
+                </button>
+              </div>
+              <div className="muted feedback-text">{EXAMPLE_INPUT}</div>
+            </div>
           </div>
         ) : (
           <div style={{ marginTop: 12 }}>
@@ -349,6 +394,14 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
             {isLoading ? "Анализируем..." : "Анализировать"}
           </button>
         </div>
+
+        {isLoading ? (
+          <div className="loadingPanel">
+            <div className="loadingTitle">{ANALYZE_STEPS[loadingStepIndex]}</div>
+            <div className="loadingSkeletonRow" />
+            <div className="loadingSkeletonRow short" />
+          </div>
+        ) : null}
       </div>
 
       <div className="card">
