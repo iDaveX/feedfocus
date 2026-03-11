@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import { readAnalysisCache } from "@/src/client/analysisCache";
 import { authFetch } from "@/src/client/anon";
 import type { AnalysisDetails } from "@/src/shared/api";
 import { posthog } from "@/src/lib/posthog";
@@ -38,6 +39,12 @@ export default function AnalysisPage() {
   }, [data]);
 
   useEffect(() => {
+    const cached = readAnalysisCache(id);
+    if (cached) {
+      setData(cached);
+      setError(null);
+    }
+
     let cancelled = false;
 
     void (async () => {

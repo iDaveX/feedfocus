@@ -133,8 +133,49 @@ export async function POST(req: NextRequest) {
       .filter((x): x is NonNullable<typeof x> => Boolean(x));
 
     if (hypothesisRows.length > 0) {
-      const hypIns = await supabase.from("hypotheses").insert(hypothesisRows);
+      const hypIns = await supabase
+        .from("hypotheses")
+        .insert(hypothesisRows)
+        .select("id, pain_point_id, title, hypothesis, expected_impact, confidence, status");
       if (hypIns.error) return jsonError(`DB error: ${hypIns.error.message}`, 500);
+      await supabase.from("events").insert({
+        user_id: user.userId,
+        name: "analysis_completed",
+        meta: { analysis_id: analysisId, pain_points: painPointRows.length, hypotheses: hypothesisRows.length }
+      });
+
+      return NextResponse.json({
+        analysisId,
+        details: {
+          analysis: {
+            id: analysisId,
+            createdAt: analysisIns.data.created_at as string,
+            mainInsight: result.mainInsight
+          },
+          painPoints: (painIns.data ?? []).map((row) => {
+            const source = result.painPoints.find((p) => p.llmKey === (row.llm_key as string));
+            return {
+              id: row.id as string,
+              title: source?.title ?? "",
+              summary: source?.summary ?? "",
+              evidenceCount: source?.evidenceCount ?? 0,
+              quotes: source?.quotes ?? [],
+              cjmStage: source?.cjmStage ?? "Other",
+              severity: source?.severity ?? "medium",
+              confidence: source?.confidence ?? "medium"
+            };
+          }),
+          hypotheses: (hypIns.data ?? []).map((h) => ({
+            id: h.id as string,
+            painPointId: h.pain_point_id as string,
+            title: h.title as string,
+            hypothesis: h.hypothesis as string,
+            expectedImpact: h.expected_impact as "low" | "medium" | "high",
+            confidence: h.confidence as "low" | "medium" | "high",
+            status: h.status as "new" | "testing" | "validated" | "rejected"
+          }))
+        }
+      });
     }
 
     await supabase.from("events").insert({
@@ -143,7 +184,30 @@ export async function POST(req: NextRequest) {
       meta: { analysis_id: analysisId, pain_points: painPointRows.length, hypotheses: hypothesisRows.length }
     });
 
-    return NextResponse.json({ analysisId });
+    return NextResponse.json({
+      analysisId,
+      details: {
+        analysis: {
+          id: analysisId,
+          createdAt: analysisIns.data.created_at as string,
+          mainInsight: result.mainInsight
+        },
+        painPoints: (painIns.data ?? []).map((row) => {
+          const source = result.painPoints.find((p) => p.llmKey === (row.llm_key as string));
+          return {
+            id: row.id as string,
+            title: source?.title ?? "",
+            summary: source?.summary ?? "",
+            evidenceCount: source?.evidenceCount ?? 0,
+            quotes: source?.quotes ?? [],
+            cjmStage: source?.cjmStage ?? "Other",
+            severity: source?.severity ?? "medium",
+            confidence: source?.confidence ?? "medium"
+          };
+        }),
+        hypotheses: []
+      }
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Internal error.";
     const status = typeof (e as any)?.status === "number" ? ((e as any).status as number) : null;

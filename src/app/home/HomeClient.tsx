@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { authFetch } from "@/src/client/anon";
+import { saveAnalysisCache } from "@/src/client/analysisCache";
 import { trackEvent } from "@/src/client/track";
-import type { AnalysisListItem } from "@/src/shared/api";
+import type { AnalysisDetails, AnalysisListItem } from "@/src/shared/api";
 import { posthog } from "@/src/lib/posthog";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -223,7 +224,7 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         },
         body: JSON.stringify({ raw: items.join("\n") })
       });
-      const data = (await res.json()) as { analysisId?: string; message?: string };
+      const data = (await res.json()) as { analysisId?: string; details?: AnalysisDetails; message?: string };
       if (!res.ok) {
         posthog.capture("analysis_failed", {
           items_count: items.length,
@@ -244,6 +245,9 @@ export default function HomeClient({ maxItems }: { maxItems: number }) {
         });
         setError("Не удалось получить ID анализа.");
         return;
+      }
+      if (data.details) {
+        saveAnalysisCache(data.details);
       }
       posthog.capture("analysis_completed", { analysisId: data.analysisId, items_count: items.length });
       window.location.href = `/analysis/${data.analysisId}`;
