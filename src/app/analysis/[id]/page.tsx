@@ -92,15 +92,26 @@ export default function AnalysisPage() {
             </div>
           </div>
           <div className="row">
+            <a href={`/api/analyses/${id}/report`}>
+              <button>Скачать отчет</button>
+            </a>
             <Link href={`/analysis/${id}/hypotheses`}>
-              <button className="primary">Гипотезы →</button>
+              <button className="primary">Продуктовые гипотезы →</button>
             </Link>
           </div>
         </div>
       </div>
 
       <div className="card">
-        <h3 style={{ marginTop: 0 }}>Проблемы (pain points)</h3>
+        <h3 style={{ marginTop: 0 }}>Главный инсайт</h3>
+        <div className="muted feedback-text">
+          {data.analysis.mainInsight?.trim() ||
+            (painPointsSorted[0]?.title ? `Главная проблема пользователей — ${painPointsSorted[0].title}.` : "—")}
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>Проблемы пользователей</h3>
         <div className="desktopOnly">
           <table className="table compactTable" style={{ marginTop: 10 }}>
             <thead>

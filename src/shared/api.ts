@@ -24,6 +24,7 @@ export type AnalysisDetails = {
   analysis: {
     id: string;
     createdAt: string;
+    mainInsight?: string | null;
   };
   painPoints: Array<{
     id: string;
@@ -55,4 +56,3 @@ export type DashboardData = {
   topCjmStages: Array<{ stage: CjmStage; share: number }>;
   hypothesisStatus: Array<{ status: HypothesisStatus; count: number }>;
 };
-

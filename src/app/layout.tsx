@@ -5,7 +5,7 @@ import PosthogInit from "@/src/app/PosthogInit";
 
 export const metadata = {
   title: "FeedFocus",
-  description: "Анализ фидбека → pain points (CJM) → гипотезы"
+  description: "Анализ отзывов → проблемы пользователей (CJM) → продуктовые гипотезы"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

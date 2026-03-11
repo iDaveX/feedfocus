@@ -48,10 +48,13 @@ create table if not exists public.analyses (
   completed_at timestamptz,
   input_raw text not null,
   input_items jsonb not null,
+  main_insight text,
   model text not null,
   status text not null check (status in ('completed', 'failed')),
   error text
 );
+
+alter table public.analyses add column if not exists main_insight text;
 
 create index if not exists analyses_user_created_at_idx on public.analyses (user_id, created_at desc);
 create index if not exists analyses_created_at_idx on public.analyses (created_at desc);

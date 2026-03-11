@@ -97,13 +97,13 @@ export default function HypothesesPage() {
       <div className="card">
         <div className="row" style={{ justifyContent: "space-between" }}>
           <div>
-            <h2 style={{ margin: 0 }}>Гипотезы</h2>
+            <h2 style={{ margin: 0 }}>Продуктовые гипотезы</h2>
             <div className="muted" style={{ marginTop: 6 }}>
               {data.hypotheses.length} гипотез · статус можно менять вручную
             </div>
           </div>
           <Link href={`/analysis/${analysisId}`} className="muted">
-            ← Результаты
+            ← Результаты анализа
           </Link>
         </div>
       </div>

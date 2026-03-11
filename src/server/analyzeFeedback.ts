@@ -38,6 +38,7 @@ const llmHypothesisSchema = z.object({
 });
 
 const llmResultSchema = z.object({
+  main_insight: z.string().min(1).max(400),
   pain_points: z.array(llmPainPointSchema).min(1).max(20),
   hypotheses: z.array(llmHypothesisSchema).min(1).max(60)
 });
@@ -96,6 +97,8 @@ export async function analyzeFeedback(items: string[]) {
           "Входные отзывы (каждая строка — отдельный отзыв с индексом):\n" +
           numbered +
           "\n\nСформируй:\n" +
+          "0) main_insight: 1–2 предложения — главный вывод по всему массиву отзывов. " +
+          "Если можешь, укажи приблизительную долю (в %) самого частого pain point от общего числа отзывов.\n" +
           "1) pain_points[]: каждый pain point должен иметь key (например pp_1), title, summary, cjm_stage, severity, confidence,\n" +
           "   и evidence_indices[] — список индексов отзывов, где встречается проблема.\n" +
           "2) hypotheses[]: гипотезы в формате: 'Если [изменение], то [метрика/поведение], потому что [обоснование]'.\n" +
@@ -127,6 +130,7 @@ export async function analyzeFeedback(items: string[]) {
             type: "object",
             additionalProperties: false,
             properties: {
+              main_insight: { type: "string" },
               pain_points: {
                 type: "array",
                 items: {
@@ -168,7 +172,7 @@ export async function analyzeFeedback(items: string[]) {
                 }
               }
             },
-            required: ["pain_points", "hypotheses"]
+            required: ["main_insight", "pain_points", "hypotheses"]
           }
         }
       }
@@ -220,5 +224,5 @@ export async function analyzeFeedback(items: string[]) {
       status: h.status
     }));
 
-  return { painPoints, hypotheses, model };
+  return { painPoints, hypotheses, mainInsight: parsed.data.main_insight, model };
 }

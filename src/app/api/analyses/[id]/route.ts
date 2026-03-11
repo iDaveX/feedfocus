@@ -9,9 +9,18 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const { id } = await ctx.params;
     const supabase = getSupabaseAdmin();
 
-    const analysis = await supabase.from("analyses").select("id, created_at, user_id").eq("id", id).single();
+    const analysis = await supabase
+      .from("analyses")
+      .select("id, created_at, user_id, main_insight")
+      .eq("id", id)
+      .single();
     if (analysis.error) return jsonError("Анализ не найден.", 404);
-    const analysisData = analysis.data as unknown as { id?: string; created_at?: string; user_id?: string };
+    const analysisData = analysis.data as unknown as {
+      id?: string;
+      created_at?: string;
+      user_id?: string;
+      main_insight?: string | null;
+    };
     if (!analysisData?.id || !analysisData.user_id || !analysisData.created_at) return jsonError("Анализ не найден.", 404);
     if (analysisData.user_id !== user.userId) return jsonError("Forbidden.", 403);
 
@@ -30,7 +39,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (hypotheses.error) return jsonError(`DB error: ${hypotheses.error.message}`, 500);
 
     return NextResponse.json({
-      analysis: { id: analysisData.id, createdAt: analysisData.created_at },
+      analysis: { id: analysisData.id, createdAt: analysisData.created_at, mainInsight: analysisData.main_insight ?? null },
       painPoints: (painPoints.data ?? []).map((p) => ({
         id: p.id as string,
         title: p.title as string,

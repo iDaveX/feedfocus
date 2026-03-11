@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
         user_id: user.userId,
         input_raw: parsedBody.data.raw,
         input_items: items,
+        main_insight: result.mainInsight,
         model: result.model,
         status: "completed",
         completed_at: new Date().toISOString()

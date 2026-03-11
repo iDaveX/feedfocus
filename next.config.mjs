@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: process.cwd(),
+  serverExternalPackages: ["pdfmake"],
 };
 
 export default nextConfig;
