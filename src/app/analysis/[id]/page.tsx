@@ -4,11 +4,10 @@ import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { hasAnalysisCache, readAnalysisCache } from "@/src/client/analysisCache";
+import { downloadAnalysisReportPdf } from "@/src/client/pdf";
 import { authFetch } from "@/src/client/anon";
 import type { AnalysisDetails } from "@/src/shared/api";
 import { posthog } from "@/src/lib/posthog";
-import PdfPrinter from "pdfmake";
-import vfsFonts from "pdfmake/build/vfs_fonts";
 
 const CJM_STAGE_RU: Record<string, string> = {
   Acquisition: "Привлечение",
@@ -26,52 +25,6 @@ const SEVERITY_RU: Record<string, string> = {
   medium: "средняя",
   high: "высокая"
 };
-
-const IMPACT_RU: Record<string, string> = {
-  low: "низкий",
-  medium: "средний",
-  high: "высокий"
-};
-
-const CONFIDENCE_RU: Record<string, string> = {
-  low: "низкая",
-  medium: "средняя",
-  high: "высокая"
-};
-
-function getPdfBytes(docDefinition: any): Promise<Uint8Array> {
-  const vfs = (vfsFonts as any).pdfMake?.vfs ?? (vfsFonts as any).vfs;
-  const getFont = (name: string) => Uint8Array.from(atob(vfs[name]), (c) => c.charCodeAt(0));
-
-  const fonts = {
-    Roboto: {
-      normal: getFont("Roboto-Regular.ttf"),
-      bold: getFont("Roboto-Medium.ttf"),
-      italics: getFont("Roboto-Italic.ttf"),
-      bolditalics: getFont("Roboto-MediumItalic.ttf")
-    }
-  };
-
-  const printer = new (PdfPrinter as any)(fonts);
-  const pdfDoc = printer.createPdfKitDocument(docDefinition, {});
-
-  return new Promise((resolve, reject) => {
-    const chunks: Uint8Array[] = [];
-    pdfDoc.on("data", (chunk: Uint8Array) => chunks.push(chunk));
-    pdfDoc.on("end", () => {
-      const total = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-      const merged = new Uint8Array(total);
-      let offset = 0;
-      for (const chunk of chunks) {
-        merged.set(chunk, offset);
-        offset += chunk.length;
-      }
-      resolve(merged);
-    });
-    pdfDoc.on("error", reject);
-    pdfDoc.end();
-  });
-}
 
 export default function AnalysisPage() {
   const params = useParams<{ id: string }>();
@@ -149,51 +102,7 @@ export default function AnalysisPage() {
       window.location.href = `/api/analyses/${id}/report`;
       return;
     }
-
-    const dateRu = new Date(data.analysis.createdAt).toLocaleString("ru-RU");
-    const docDefinition = {
-      pageMargins: [40, 40, 40, 40],
-      defaultStyle: { font: "Roboto", fontSize: 11 },
-      content: [
-        { text: "Отчет анализа пользовательских отзывов", style: "title" },
-        { text: `Дата анализа: ${dateRu}`, margin: [0, 6, 0, 0] },
-        { text: `Проанализировано отзывов: ${data.painPoints.reduce((sum, item) => sum + item.evidenceCount, 0)}`, margin: [0, 2, 0, 10] },
-        data.analysis.mainInsight ? { text: "Главный инсайт", style: "h2" } : { text: "" },
-        data.analysis.mainInsight ? { text: data.analysis.mainInsight, margin: [0, 4, 0, 10] } : { text: "" },
-        { text: "Проблемы пользователей", style: "h2" },
-        ...data.painPoints.flatMap((p, idx) => [
-          { text: `${idx + 1}. ${p.title}`, style: "h3", margin: [0, 8, 0, 0] },
-          { text: `Упоминаний: ${p.evidenceCount}`, margin: [0, 2, 0, 0] },
-          { text: `Этап CJM: ${CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage}`, margin: [0, 2, 0, 0] },
-          { text: `Серьёзность: ${SEVERITY_RU[p.severity] ?? p.severity}`, margin: [0, 2, 0, 0] },
-          { text: p.summary, margin: [0, 4, 0, 0], color: "#555555" }
-        ]),
-        { text: "Продуктовые гипотезы", style: "h2", margin: [0, 14, 0, 0] },
-        ...data.hypotheses.map((h, idx) => ({
-          stack: [
-            { text: `${idx + 1}. ${h.title}`, style: "h3", margin: [0, 8, 0, 0] },
-            { text: h.hypothesis, margin: [0, 2, 0, 0] },
-            { text: `Эффект: ${IMPACT_RU[h.expectedImpact] ?? h.expectedImpact}`, margin: [0, 2, 0, 0] },
-            { text: `Уверенность: ${CONFIDENCE_RU[h.confidence] ?? h.confidence}`, margin: [0, 2, 0, 0] }
-          ]
-        }))
-      ],
-      styles: {
-        title: { fontSize: 18, bold: true },
-        h2: { fontSize: 14, bold: true, margin: [0, 10, 0, 0] },
-        h3: { fontSize: 12, bold: true }
-      }
-    };
-
-    const pdf = await getPdfBytes(docDefinition);
-    const buffer = pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength) as ArrayBuffer;
-    const blob = new Blob([buffer], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `feedfocus-report-${id}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
+    await downloadAnalysisReportPdf(data, `feedfocus-report-${id}.pdf`);
   }
 
   if (error) {

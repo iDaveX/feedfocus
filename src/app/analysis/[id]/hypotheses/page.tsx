@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { authFetch } from "@/src/client/anon";
-import { readAnalysisCache } from "@/src/client/analysisCache";
+import { hasAnalysisCache, readAnalysisCache } from "@/src/client/analysisCache";
+import { downloadHypothesesPdf } from "@/src/client/pdf";
 import type { AnalysisDetails, HypothesisStatus } from "@/src/shared/api";
 import { trackEvent } from "@/src/client/track";
 
@@ -27,6 +28,7 @@ export default function HypothesesPage() {
   const analysisId = params.id;
   const [data, setData] = useState<AnalysisDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openHypothesisId, setOpenHypothesisId] = useState<string | null>(null);
 
   useEffect(() => {
     const cached = readAnalysisCache(analysisId);
@@ -62,6 +64,17 @@ export default function HypothesesPage() {
     for (const p of data?.painPoints ?? []) map.set(p.id, p.title);
     return map;
   }, [data]);
+
+  const hypothesesSorted = useMemo(() => {
+    if (!data) return [];
+    return [...data.hypotheses];
+  }, [data]);
+
+  async function onDownloadHypotheses() {
+    if (!data) return;
+    if (!hasAnalysisCache(analysisId)) return;
+    await downloadHypothesesPdf(data, `feedfocus-hypotheses-${analysisId}.pdf`);
+  }
 
   async function setStatus(hypothesisId: string, status: HypothesisStatus) {
     try {
@@ -115,43 +128,112 @@ export default function HypothesesPage() {
               {data.hypotheses.length} гипотез · статус можно менять вручную
             </div>
           </div>
-          <Link href={`/analysis/${analysisId}`} className="muted">
-            ← Результаты анализа
-          </Link>
+          <div className="row">
+            {hasAnalysisCache(analysisId) ? <button onClick={() => void onDownloadHypotheses()}>Скачать гипотезы</button> : null}
+            <Link href={`/analysis/${analysisId}`} className="muted">
+              ← Результаты анализа
+            </Link>
+          </div>
         </div>
       </div>
 
-      {data.hypotheses.map((h) => (
-        <div className="card" key={h.id}>
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>{h.title}</div>
-              <div className="muted feedback-text" style={{ marginTop: 6 }}>
-                {h.hypothesis}
-              </div>
-            </div>
-            <div className="row" style={{ gap: 10, alignItems: "flex-start" }}>
-              <div className="pill">Эффект: {LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</div>
-              <div className="pill">Уверенность: {LEVEL_RU[h.confidence] ?? h.confidence}</div>
-            </div>
-          </div>
-
-          <div className="row" style={{ marginTop: 12, justifyContent: "space-between" }}>
-            <div className="muted" style={{ minWidth: 0, overflowWrap: "anywhere" }}>
-              Связано с: {painPointById.get(h.painPointId) ?? "—"}
-            </div>
-            <div className="row">
-              <select value={h.status} onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}>
-                {STATUSES.map((s) => (
-                  <option value={s} key={s}>
-                    {STATUS_RU[s]}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+      <div className="card">
+        <div className="desktopOnly">
+          <table className="table compactTable" style={{ marginTop: 4 }}>
+            <thead>
+              <tr>
+                <th>Гипотеза</th>
+                <th>Эффект</th>
+                <th>Уверенность</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hypothesesSorted.map((h) => {
+                const isOpen = openHypothesisId === h.id;
+                return (
+                  <Fragment key={h.id}>
+                    <tr className="rowClickable" onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
+                      <td style={{ fontWeight: 700 }}>
+                        {h.title}{" "}
+                        <span className="muted" style={{ fontWeight: 500 }}>
+                          {isOpen ? "▲" : "▼"}
+                        </span>
+                      </td>
+                      <td className="muted">{LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</td>
+                      <td className="muted">{LEVEL_RU[h.confidence] ?? h.confidence}</td>
+                      <td>
+                        <select
+                          value={h.status}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}
+                        >
+                          {STATUSES.map((s) => (
+                            <option value={s} key={s}>
+                              {STATUS_RU[s]}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                    {isOpen ? (
+                      <tr className="rowDetails">
+                        <td colSpan={4}>
+                          <div className="detailsBox">
+                            <div className="muted feedback-text">{h.hypothesis}</div>
+                            <div className="muted" style={{ marginTop: 8 }}>
+                              Связано с: {painPointById.get(h.painPointId) ?? "—"}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-      ))}
+
+        <div className="mobileOnly" style={{ marginTop: 10 }}>
+          {hypothesesSorted.map((h) => {
+            const isOpen = openHypothesisId === h.id;
+            return (
+              <div className="compactCard" key={h.id}>
+                <div style={{ fontWeight: 800 }}>{h.title}</div>
+                <div className="muted" style={{ marginTop: 8 }}>
+                  <div>
+                    <b style={{ color: "var(--text)" }}>Эффект:</b> {LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}
+                  </div>
+                  <div style={{ marginTop: 4 }}>
+                    <b style={{ color: "var(--text)" }}>Уверенность:</b> {LEVEL_RU[h.confidence] ?? h.confidence}
+                  </div>
+                </div>
+                <div className="row" style={{ marginTop: 10, justifyContent: "space-between" }}>
+                  <button onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
+                    {isOpen ? "Скрыть детали" : "Показать детали"}
+                  </button>
+                  <select value={h.status} onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}>
+                    {STATUSES.map((s) => (
+                      <option value={s} key={s}>
+                        {STATUS_RU[s]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {isOpen ? (
+                  <div className="detailsBox" style={{ marginTop: 10 }}>
+                    <div className="muted feedback-text">{h.hypothesis}</div>
+                    <div className="muted" style={{ marginTop: 8 }}>
+                      Связано с: {painPointById.get(h.painPointId) ?? "—"}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </>
   );
 }
