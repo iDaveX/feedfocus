@@ -173,60 +173,68 @@ export default function HypothesesPage() {
       </div>
 
       <div className="card">
+        {hypothesesSorted.length === 0 ? (
+          <div className="muted feedback-text">
+            Гипотезы не сгенерированы, потому что сервис не нашел достаточно подтвержденных проблем для продуктовой
+            проработки.
+          </div>
+        ) : null}
         <div className="desktopOnly">
-          <table className="table compactTable" style={{ marginTop: 4 }}>
-            <thead>
-              <tr>
-                <th>Гипотеза</th>
-                <th>Эффект</th>
-                <th>Статус</th>
-              </tr>
-            </thead>
-            <tbody>
-              {hypothesesSorted.map((h) => {
-                const isOpen = openHypothesisId === h.id;
-                return (
-                  <Fragment key={h.id}>
-                    <tr className="rowClickable" onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
-                      <td style={{ fontWeight: 700 }}>
-                        {h.title}{" "}
-                        <span className="muted" style={{ fontWeight: 500 }}>
-                          {isOpen ? "▲" : "▼"}
-                        </span>
-                      </td>
-                      <td className="muted">{LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</td>
-                      <td>
-                        <select
-                          className={`statusSelect status-${h.status}`}
-                          value={h.status}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}
-                        >
-                          {STATUSES.map((s) => (
-                            <option value={s} key={s}>
-                              {STATUS_RU[s]}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                    {isOpen ? (
-                      <tr className="rowDetails">
-                        <td colSpan={3}>
-                          <div className="detailsBox">
-                            <div className="muted feedback-text">{h.hypothesis}</div>
-                            <div className="muted" style={{ marginTop: 8 }}>
-                              Проблема: {painPointById.get(h.painPointId) ?? "—"}
-                            </div>
-                          </div>
+          {hypothesesSorted.length > 0 ? (
+            <table className="table compactTable" style={{ marginTop: 4 }}>
+              <thead>
+                <tr>
+                  <th>Гипотеза</th>
+                  <th>Эффект</th>
+                  <th>Статус</th>
+                </tr>
+              </thead>
+              <tbody>
+                {hypothesesSorted.map((h) => {
+                  const isOpen = openHypothesisId === h.id;
+                  return (
+                    <Fragment key={h.id}>
+                      <tr className="rowClickable" onClick={() => setOpenHypothesisId(isOpen ? null : h.id)}>
+                        <td style={{ fontWeight: 700 }}>
+                          {h.title}{" "}
+                          <span className="muted" style={{ fontWeight: 500 }}>
+                            {isOpen ? "▲" : "▼"}
+                          </span>
+                        </td>
+                        <td className="muted">{LEVEL_RU[h.expectedImpact] ?? h.expectedImpact}</td>
+                        <td>
+                          <select
+                            className={`statusSelect status-${h.status}`}
+                            value={h.status}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => setStatus(h.id, e.target.value as HypothesisStatus)}
+                          >
+                            {STATUSES.map((s) => (
+                              <option value={s} key={s}>
+                                {STATUS_RU[s]}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                       </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                      {isOpen ? (
+                        <tr className="rowDetails">
+                          <td colSpan={3}>
+                            <div className="detailsBox">
+                              <div className="muted feedback-text">{h.hypothesis}</div>
+                              <div className="muted" style={{ marginTop: 8 }}>
+                                Проблема: {painPointById.get(h.painPointId) ?? "—"}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : null}
         </div>
 
         <div className="mobileOnly" style={{ marginTop: 10 }}>

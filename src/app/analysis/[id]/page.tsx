@@ -29,7 +29,9 @@ const PRIORITY_RU: Record<string, string> = {
 function formatMainInsight(value: string | null | undefined, fallbackTitle?: string) {
   const raw = value?.trim();
   if (!raw) {
-    return fallbackTitle ? `Главная проблема пользователей — ${fallbackTitle}.` : "—";
+    return fallbackTitle
+      ? `Главная проблема пользователей — ${fallbackTitle}.`
+      : "В этой выборке не удалось подтвердить выраженные повторяющиеся проблемы.";
   }
 
   const normalized = raw.replace(/\s+/g, " ").trim();
@@ -168,57 +170,65 @@ export default function AnalysisPage() {
 
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Проблемы пользователей</h3>
+        {painPointsSorted.length === 0 ? (
+          <div className="muted feedback-text" style={{ marginTop: 10 }}>
+            Повторяющихся подтвержденных проблем не найдено. В выборке преобладают нейтральные, позитивные или слишком
+            разрозненные отзывы.
+          </div>
+        ) : null}
         <div className="desktopOnly">
-          <table className="table compactTable" style={{ marginTop: 10 }}>
-            <thead>
-              <tr>
-                <th>Проблема</th>
-                <th>Отзывов</th>
-                <th>Этап CJM</th>
-                <th>Приоритет</th>
-              </tr>
-            </thead>
-            <tbody>
-              {painPointsSorted.map((p) => {
-                const isOpen = openPainPointId === p.id;
-                const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
-                const sev = PRIORITY_RU[p.severity] ?? p.severity;
-                return (
-                  <Fragment key={p.id}>
-                    <tr className="rowClickable" onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
-                      <td style={{ fontWeight: 700 }}>
-                        {p.title}{" "}
-                        <span className="muted" style={{ fontWeight: 500 }}>
-                          {isOpen ? "▲" : "▼"}
-                        </span>
-                      </td>
-                      <td className="muted">{p.evidenceCount}</td>
-                      <td className="muted">{stage}</td>
-                      <td className="muted">{sev}</td>
-                    </tr>
-                    {isOpen ? (
-                      <tr className="rowDetails">
-                        <td colSpan={4}>
-                          <div className="detailsBox">
-                            <div className="muted feedback-text">{p.summary}</div>
-                            {p.quotes.length > 0 ? (
-                              <ul style={{ margin: "10px 0 0", paddingLeft: 16 }}>
-                                {p.quotes.slice(0, 3).map((q, i) => (
-                                  <li key={i} className="muted feedback-text">
-                                    {q}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </div>
+          {painPointsSorted.length > 0 ? (
+            <table className="table compactTable" style={{ marginTop: 10 }}>
+              <thead>
+                <tr>
+                  <th>Проблема</th>
+                  <th>Отзывов</th>
+                  <th>Этап CJM</th>
+                  <th>Приоритет</th>
+                </tr>
+              </thead>
+              <tbody>
+                {painPointsSorted.map((p) => {
+                  const isOpen = openPainPointId === p.id;
+                  const stage = CJM_STAGE_RU[p.cjmStage] ?? p.cjmStage;
+                  const sev = PRIORITY_RU[p.severity] ?? p.severity;
+                  return (
+                    <Fragment key={p.id}>
+                      <tr className="rowClickable" onClick={() => setOpenPainPointId(isOpen ? null : p.id)}>
+                        <td style={{ fontWeight: 700 }}>
+                          {p.title}{" "}
+                          <span className="muted" style={{ fontWeight: 500 }}>
+                            {isOpen ? "▲" : "▼"}
+                          </span>
                         </td>
+                        <td className="muted">{p.evidenceCount}</td>
+                        <td className="muted">{stage}</td>
+                        <td className="muted">{sev}</td>
                       </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                      {isOpen ? (
+                        <tr className="rowDetails">
+                          <td colSpan={4}>
+                            <div className="detailsBox">
+                              <div className="muted feedback-text">{p.summary}</div>
+                              {p.quotes.length > 0 ? (
+                                <ul style={{ margin: "10px 0 0", paddingLeft: 16 }}>
+                                  {p.quotes.slice(0, 3).map((q, i) => (
+                                    <li key={i} className="muted feedback-text">
+                                      {q}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : null}
         </div>
 
         <div className="mobileOnly" style={{ marginTop: 10 }}>
